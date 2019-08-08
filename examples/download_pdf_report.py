@@ -1,6 +1,6 @@
 from apiclient.APIs import CodeDXClient
 
-# API key and base url from Code DX and 
+# API key and base url from Code DX
 api_key = ""
 base_url = ""
 project = ""
