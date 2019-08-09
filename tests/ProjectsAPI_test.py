@@ -24,43 +24,43 @@ class ProjectsAPI_test(unittest.TestCase):
 			  ]
 			}
 		self.musers = [
-						  {
-						    "user": {
-						      "id": 0,
-						      "type": "local",
-						      "name": "string",
-						      "principal": "string",
-						      "isEnabled": True,
-						      "isSystem": True,
-						      "isAdmin": True,
-						      "isCurrent": True
-						    },
-						    "roles": {
-						      "Reader": True,
-						      "Updater": True,
-						      "Creator": True,
-						      "Manager": True
-						    }
-						  },
-						  {
-						    "user": {
-						      "id": 2,
-						      "type": "local",
-						      "name": "string",
-						      "principal": "string",
-						      "isEnabled": True,
-						      "isSystem": True,
-						      "isAdmin": True,
-						      "isCurrent": True
-						    },
-						    "roles": {
-						      "Reader": True,
-						      "Updater": False,
-						      "Creator": False,
-						      "Manager": False
-						    }
-						  }
-						]
+						{
+							"user": {
+								"id": 0,
+								"type": "local",
+								"name": "string",
+								"principal": "string",
+								"isEnabled": True,
+								"isSystem": True,
+								"isAdmin": True,
+								"isCurrent": True
+							},
+							"roles": {
+								"Reader": True,
+								"Updater": True,
+								"Creator": True,
+								"Manager": True
+							}
+						},
+						{
+							"user": {
+								"id": 2,
+								"type": "local",
+								"name": "string",
+								"principal": "string",
+								"isEnabled": True,
+								"isSystem": True,
+								"isAdmin": True,
+								"isCurrent": True
+							},
+							"roles": {
+								"Reader": True,
+								"Updater": False,
+								"Creator": False,
+								"Manager": False
+							}
+						}
+					]
 
 	@patch('requests.get')
 	def test_get_projects(self, mock_get_projects):
@@ -357,41 +357,41 @@ class ProjectsAPI_test(unittest.TestCase):
 	@patch('requests.post')
 	def test_query(self, mock_query_base):
 		mock_query_base.return_value.json.return_value = [
-														  {
-														    "id": 12,
-														    "name": "The first webgoat project",
-														    "parentId": None,
-														    "hierarchyIds": [],
-														    "latestCompleteAnalysis": {
-														      "id": 3,
-														      "projectId": 12,
-														      "state": "complete",
-														      "createdBy": {
-														        "id": 1,
-														        "name": "admin"
-														      },
-														      "creationTime": "2018-01-17T11:33:42.000-05:00",
-														      "startTime": "2018-01-17T11:33:42.000-05:00",
-														      "endTime": "2018-01-17T11:33:42.000-05:00"
-														    },
-														    "metadata": [
-														      {
-														        "id": 1,
-														        "name": "Project Owner",
-														        "value": "Jim"
-														      },
-														      {
-														        "id": 5,
-														        "name": "Impact",
-														        "value": "Medium"
-														      },
-														      {
-														        "id": 7,
-														        "name": "My Tags Field",
-														        "value": "hello world"
-														      }
-														    ]
-														  }
+															{
+																"id": 12,
+																"name": "The first webgoat project",
+																"parentId": None,
+																"hierarchyIds": [],
+																"latestCompleteAnalysis": {
+																	"id": 3,
+																	"projectId": 12,
+																	"state": "complete",
+																	"createdBy": {
+																		"id": 1,
+																		"name": "admin"
+																	},
+																	"creationTime": "2018-01-17T11:33:42.000-05:00",
+																	"startTime": "2018-01-17T11:33:42.000-05:00",
+																	"endTime": "2018-01-17T11:33:42.000-05:00"
+																},
+																"metadata": [
+																	{
+																		"id": 1,
+																		"name": "Project Owner",
+																		"value": "Jim"
+																	},
+																	{
+																		"id": 5,
+																		"name": "Impact",
+																		"value": "Medium"
+																	},
+																	{
+																		"id": 7,
+																		"name": "My Tags Field",
+																		"value": "hello world"
+																	}
+																]
+															}
 														]
 		mock_query_base.return_value.headers= {"Content-Type": 'application/json;charset=utf-8'}
 		mock_query_base.return_value.status_code = 200
@@ -427,14 +427,14 @@ class ProjectsAPI_test(unittest.TestCase):
 	@patch('requests.post')
 	def test_file_paths(self, mock_file_paths):
 		mock_file_paths.return_value.json.return_value = {
-														  "C:/code/myproject/src/main/java/com/foo/Bar.java": {
-														    "id": 1234,
-														    "path": "somewhere/src/main/java/com/foo/Bar.java"
-														  },
-														  "DatabaseUtilities.java": {
-														    "id": 789,
-														    "path": "somewhere/src/main/java/com/foo/DatabaseUtilities.java"
-														  }
+															"C:/code/myproject/src/main/java/com/foo/Bar.java": {
+																"id": 1234,
+																"path": "somewhere/src/main/java/com/foo/Bar.java"
+															},
+															"DatabaseUtilities.java": {
+																"id": 789,
+																"path": "somewhere/src/main/java/com/foo/DatabaseUtilities.java"
+															}
 														}
 		mock_file_paths.return_value.headers["Content-Type"] = 'application/json;charset=utf-8'
 		mock_file_paths.return_value.status_code = 200
