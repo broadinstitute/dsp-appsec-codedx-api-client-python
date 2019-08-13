@@ -26,8 +26,9 @@ class Projects(APIClient):
 
 	def update_projects(self):
 		res = self.get_projects()
-		for row in res['projects']:
-			self.projects[row['name']] = row['id']
+		if 'projects' in res:
+			for row in res['projects']:
+				self.projects[row['name']] = row['id']
 
 	def print_projects(self):
 		""" Prints the current list of projects. """
