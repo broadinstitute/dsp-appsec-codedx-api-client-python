@@ -4,8 +4,8 @@ from unittest.mock import MagicMock, patch
 from apiclient.APIs import AnalysisAPI
 
 # DO NOT UPDATE - MOCK REQUESTS DO NOT REQUIRE CREDENTIALS
-api_key = "0000-0000-0000-0000"
-base_url = "sample-url.codedx.com"
+api_key = "45a542ce-38ac-4e9c-950d-891086fe0d1b"
+base_url = "https://codedx101.dsp-techops.broadinstitute.org/codedx"
 
 class AnalysisAPI_test(unittest.TestCase):
 
@@ -112,6 +112,224 @@ class AnalysisAPI_test(unittest.TestCase):
 			self.analysis_api.run_analysis(-5)
 
 	@patch('requests.get')
+	def test_get_input_metadata(self, mock_get_input_metadata):
+		mock_get_input_metadata.return_value.json.return_value = {
+																  "tags": [
+																    {
+																      "source": "string",
+																      "binary": "string",
+																      "buildMeta": "string",
+																      "toolOutput": "string",
+																      "toolInput": "string",
+																      "id": "string",
+																      "enabled": True,
+																      "enabledReason": "string"
+																    }
+																  ],
+																  "scmInfo": {
+																    "repoType": "string",
+																    "url": "string",
+																    "rev": {
+																      "revType": "branch",
+																      "revName": "string",
+																      "revDetail": "string"
+																    }
+																  },
+																  "warnings": [
+																    "string"
+																  ],
+																  "errors": [
+																    "string"
+																  ]
+																}
+		mock_get_input_metadata.return_value.status_code = 200
+		mock_get_input_metadata.return_value.headers = {"Content-Type": 'application/json;charset=utf-8'}
+		result = self.analysis_api.get_input_metadata('1234', 'TEST')
+		self.assertTrue("tags" in result)
+		self.assertEqual(len(result["warnings"]), 1)
+		with self.assertRaises(Exception):
+			self.analysis_api.get_input_metadata(1, 'TEST')
+		with self.assertRaises(Exception):
+			self.analysis_api.get_input_metadata('1234', 2)
+
+	@patch('requests.delete')
+	def test_delete_input(self, mock_delete_input):
+		mock_delete_input.return_value.status_code = 200
+		result = self.analysis_api.delete_input('1234', 'TEST')
+		self.assertEqual(result["status"], "Success")
+		with self.assertRaises(Exception):
+			self.analysis_api.delete_input(1, 'TEST')
+		with self.assertRaises(Exception):
+			self.analysis_api.delete_input('1234', 2)
+
+	@patch('requests.delete')
+	def test_delete_pending(self, mock_delete_pending):
+		mock_delete_pending.return_value.status_code = 200
+		result = self.analysis_api.delete_pending('1234', 'TEST')
+		self.assertEqual(result["status"], "Success")
+		with self.assertRaises(Exception):
+			self.analysis_api.delete_pending(1, 'TEST')
+		with self.assertRaises(Exception):
+			self.analysis_api.delete_pending('1234', 2)
+
+	@patch('requests.put')
+	def test_toggle_display_tag(self, mock_toggle_display_tag):
+		mock_toggle_display_tag.return_value.json.return_value = {
+																  "tags": [
+																    {
+																      "source": "string",
+																      "binary": "string",
+																      "buildMeta": "string",
+																      "toolOutput": "string",
+																      "toolInput": "string",
+																      "id": "string",
+																      "enabled": True,
+																      "enabledReason": "string"
+																    }
+																  ],
+																  "scmInfo": {
+																    "repoType": "string",
+																    "url": "string",
+																    "rev": {
+																      "revType": "branch",
+																      "revName": "string",
+																      "revDetail": "string"
+																    }
+																  },
+																  "warnings": [
+																    "string"
+																  ],
+																  "errors": [
+																    "string"
+																  ]
+																}
+		mock_toggle_display_tag.return_value.status_code = 200
+		mock_toggle_display_tag.return_value.headers = {"Content-Type": 'application/json;charset=utf-8'}
+		result = self.analysis_api.toggle_display_tag('1234', 'inputId', 'tagID', True)
+		self.assertTrue("tags" in result)
+		self.assertEqual(len(result["warnings"]), 1)
+		with self.assertRaises(Exception):
+			self.analysis_api.toggle_display_tag(1234, 'inputId', 'tagID', True)
+		with self.assertRaises(Exception):
+			self.analysis_api.toggle_display_tag('1234', 1234, 'tagID', True)
+		with self.assertRaises(Exception):
+			self.analysis_api.toggle_display_tag('1234', 'inputId', 1234, True)
+		with self.assertRaises(Exception):
+			self.analysis_api.toggle_display_tag('1234', 'inputId', 'tagID', None)						
+
+	@patch('requests.put')
+	def test_enable_display_tag(self, mock_enable_display_tag):
+		mock_enable_display_tag.return_value.json.return_value = {
+																  "tags": [
+																    {
+																      "source": "string",
+																      "binary": "string",
+																      "buildMeta": "string",
+																      "toolOutput": "string",
+																      "toolInput": "string",
+																      "id": "string",
+																      "enabled": True,
+																      "enabledReason": "string"
+																    }
+																  ],
+																  "scmInfo": {
+																    "repoType": "string",
+																    "url": "string",
+																    "rev": {
+																      "revType": "branch",
+																      "revName": "string",
+																      "revDetail": "string"
+																    }
+																  },
+																  "warnings": [
+																    "string"
+																  ],
+																  "errors": [
+																    "string"
+																  ]
+																}
+		mock_enable_display_tag.return_value.status_code = 200
+		mock_enable_display_tag.return_value.headers = {"Content-Type": 'application/json;charset=utf-8'}
+		result = self.analysis_api.enable_display_tag('1234', 'inputId', 'tagID')
+		self.assertTrue("tags" in result)
+		self.assertTrue(result["tags"][0]["enabled"])
+		self.assertEqual(len(result["warnings"]), 1)
+		with self.assertRaises(Exception):
+			self.analysis_api.enable_display_tag(1234, 'inputId', 'tagID')
+		with self.assertRaises(Exception):
+			self.analysis_api.enable_display_tag('1234', 1234, 'tagID')
+		with self.assertRaises(Exception):
+			self.analysis_api.enable_display_tag('1234', 'inputId', 1234)	
+
+	@patch('requests.put')
+	def test_disable_display_tag(self, mock_disable_display_tag):
+		mock_disable_display_tag.return_value.json.return_value = {
+																  "tags": [
+																    {
+																      "source": "string",
+																      "binary": "string",
+																      "buildMeta": "string",
+																      "toolOutput": "string",
+																      "toolInput": "string",
+																      "id": "string",
+																      "enabled": False,
+																      "enabledReason": "string"
+																    }
+																  ],
+																  "scmInfo": {
+																    "repoType": "string",
+																    "url": "string",
+																    "rev": {
+																      "revType": "branch",
+																      "revName": "string",
+																      "revDetail": "string"
+																    }
+																  },
+																  "warnings": [
+																    "string"
+																  ],
+																  "errors": [
+																    "string"
+																  ]
+																}
+		mock_disable_display_tag.return_value.status_code = 200
+		mock_disable_display_tag.return_value.headers = {"Content-Type": 'application/json;charset=utf-8'}
+		result = self.analysis_api.disable_display_tag('1234', 'inputId', 'tagID')
+		self.assertTrue("tags" in result)
+		self.assertFalse(result["tags"][0]["enabled"])
+		self.assertEqual(len(result["warnings"]), 1)
+		with self.assertRaises(Exception):
+			self.analysis_api.disable_display_tag(1234, 'inputId', 'tagID')
+		with self.assertRaises(Exception):
+			self.analysis_api.disable_display_tag('1234', 1234, 'tagID')
+		with self.assertRaises(Exception):
+			self.analysis_api.disable_display_tag('1234', 'inputId', 1234)	
+
+	@patch('requests.get')
+	def test_get_all_analysis(self, mock_get_all_analysis):
+		mock_get_all_analysis.return_value.json.return_value = [{
+																"id": 0,
+																"projectId": 3,
+																"state": "string",
+																"createdBy": {
+																	"id": 0,
+																	"name": "string"
+																},
+																"creationTime": "string",
+																"startTime": "string",
+																"endTime": "string",
+																"name": "string"
+															}]
+		mock_get_all_analysis.return_value.status_code = 200
+		mock_get_all_analysis.return_value.headers = {"Content-Type": 'application/json;charset=utf-8'}
+		self.analysis_api.projects_api.projects = {'MockProj': 3}
+		result = self.analysis_api.get_all_analysis('MockProj')
+		self.assertEqual(result[0]["id"], 0)
+		self.assertEqual(result[0]["projectId"], 3)
+		with self.assertRaises(Exception):
+			self.analysis_api.get_all_analysis('Not a Project')
+
+	@patch('requests.get')
 	def test_get_analysis(self, mock_get_analysis):
 		mock_get_analysis.return_value.json.return_value = {
 																"id": 0,
@@ -132,6 +350,28 @@ class AnalysisAPI_test(unittest.TestCase):
 		result = self.analysis_api.get_analysis('MockProj', 0)
 		self.assertEqual(result["id"], 0)
 		self.assertEqual(result["projectId"], 3)
+		with self.assertRaises(Exception):
+			self.analysis_api.get_analysis('Not a Project', 2)
+		with self.assertRaises(Exception):
+			self.analysis_api.get_analysis('MockProj', 'TEST')
+
+	@patch('requests.get')
+	@patch('requests.put')
+	def test_name_analysis(self, mock_name_analysis, mock_projects):
+		mock_projects.return_value.json.return_value = self.mprojs
+		mock_projects.return_value.status_code = 200
+		mock_projects.return_value.headers = {"Content-Type": 'application/json;charset=utf-8'}
+		mock_name_analysis.return_value.status_code = 204
+		self.analysis_api.projects_api.projects = {'MockProj': 3}
+		result = self.analysis_api.name_analysis('MockProj', 1, 'NewName')
+		print(result)
+		self.assertEqual(result["status"], "Success")
+		with self.assertRaises(Exception):
+			self.analysis_api.name_analysis('Not a Project', 1, 'NewName')
+		with self.assertRaises(Exception):
+			self.analysis_api.name_analysis('MockProj', None, 'NewName')
+		with self.assertRaises(Exception):
+			self.analysis_api.name_analysis('MockProj', 1, None)	
 
 if __name__ == '__main__':
     unittest.main()
