@@ -4,8 +4,8 @@ from unittest.mock import MagicMock, patch
 from apiclient.APIs import AnalysisAPI
 
 # DO NOT UPDATE - MOCK REQUESTS DO NOT REQUIRE CREDENTIALS
-api_key = ""
-base_url = ""
+api_key = "0000-0000-0000-0000"
+base_url = "https://[CODE_DX_BASE_URL].org/codedx"
 
 class AnalysisAPI_test(unittest.TestCase):
 
