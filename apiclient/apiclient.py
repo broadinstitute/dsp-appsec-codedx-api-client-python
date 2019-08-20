@@ -5,7 +5,6 @@ import csv
 
 class APIClient(object):
 
-
 	def __init__(self, base, api_key, verbose = False):
 		self.verbose = verbose
 		self.base_path = base
