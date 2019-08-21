@@ -19,7 +19,5 @@ Add docker command here
 
 
 ### Docker
-1. `docker build --tag upload_analysis .`
-2. `docker create --name upload_analysis -e API_KEY=[API_KEY] -e URL="[BASE_URL]" -e PROJECT="[PROJECT_NAME_OR_ID]" -e FILE_PATH="./report.xml" upload_analysis:latest`
-3. `docker cp [PATH_TO_FILE] upload_analysis:./report.xml`
-4. `docker start upload_analysis && docker attach upload_analysis`
+1. `docker build --tag codedx-api-wrapper .`
+2. `docker run -v $(pwd):/app/ --name codedx-api-wrapper -e API_KEY=[CODEDX_API_KEY] -e PROJECT=[PROJECT_NAME_OR_ID] -e FILE_PATH=[PATH_TO_UPLOAD] codedx-api-wrapper:latest`
