@@ -9,7 +9,14 @@
 3. Run `python3 examples/download-pdf-report.py`.
 
 ### Usage
-...
+#### Upload Report / Run Analysis
+
+Add docker command here
+
+#### Download Report 
+
+Add docker command here 
+
 
 ### Docker
 1. `docker build --tag upload_analysis .`
