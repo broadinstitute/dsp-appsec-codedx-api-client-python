@@ -9,13 +9,16 @@
 3. Run `python3 examples/download-pdf-report.py`.
 
 ### Usage
+
 #### Upload Report / Run Analysis
 
-Add docker command here
+1. `docker build --tag codedx-api-wrapper .`
+2. `docker run -v $(pwd):/app/ --name codedx-api-wrapper -e USER_ARGS="ANALYZE [PROJECT_NAME_OR_ID] [PATH_TO_UPLOAD]" codedx-api-wrapper:latest`
 
 #### Download Report 
 
-Add docker command here 
+1. `docker build --tag codedx-api-wrapper .`
+2. `docker run -v $(pwd):/app/ --name codedx-api-wrapper -e USER_ARGS="DOWNLOAD_PDF [PROJECT_NAME_OR_ID]" codedx-api-wrapper:latest`
 
 
 ### Docker
