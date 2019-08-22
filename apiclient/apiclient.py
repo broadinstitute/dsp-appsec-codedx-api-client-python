@@ -9,11 +9,6 @@ class APIClient(object):
 		self.verbose = verbose
 		self.base_path = base
 		self.api_key = api_key
-		self.headers = {
-			'API-Key': self.api_key, 
-			'accept': 'application/json', 
-			'Content-Type': 'application/json'
-		}
 		self.commands = {
 			"GET": self._get,
 			"POST": self._post,
@@ -26,10 +21,14 @@ class APIClient(object):
 		return self.base_path + local_path
 
 	def _compose_headers(self,local_headers):
-		headers = self.headers
+		req_headers = {
+			'API-Key': self.api_key, 
+			'accept': 'application/json;charset=utf-8', 
+			'Content-Type': 'application/json'
+		}
 		for key in local_headers:
-			headers[key] = local_headers[key]
-		return headers
+			req_headers[key] = local_headers[key]
+		return req_headers
 
 	def pretty_print(self, req):
 		print('{}\n{}\n{}\n\n{}'.format(
