@@ -101,18 +101,26 @@ class Users(APIClient):
 		return res
 
 	def enable_admin(self, uid):
+		""" Gives admin privileges for the given user.
+		"""
 		user = self.get_user(uid)
 		return self.user_settings(uid, user["isEnabled"], True)
 
 	def disable_admin(self, uid):
+		""" Removes admin privileges for the given user.
+		"""
 		user = self.get_user(uid)
 		return self.user_settings(uid, user["isEnabled"], False)
 
 	def enable_user(self, uid):
+		""" Enables the given user.
+		"""
 		user = self.get_user(uid)
 		return self.user_settings(uid, True, user["isAdmin"])
 
 	def disable_user(self, uid):
+		""" Disables the given user.
+		"""
 		user = self.get_user(uid)
 		return self.user_settings(uid, False, user["isAdmin"])
 
