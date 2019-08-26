@@ -13,14 +13,9 @@
 #### Upload Report / Run Analysis
 
 1. `docker build --tag codedx-api-wrapper .`
-2. `docker run -v $(pwd):/app/ --name codedx-api-wrapper 
--e API_KEY=[CODEDX_API_KEY]
--e USER_ARGS="ANALYZE [PROJECT_NAME_OR_ID] [PATH_TO_UPLOAD]" codedx-api-wrapper:latest`
+2. `docker run -v $(pwd):/app/ upload_analysis_cmd.py [API_KEY] [PROJECT_NAME_OR_ID] [PATH_TO_UPLOAD]`
 
 #### Download Report 
 
 1. `docker build --tag codedx-api-wrapper .`
-2. `docker run -v $(pwd):/app/ --name codedx-api-wrapper 
--e API_KEY=[CODEDX_API_KEY]
--e USER_ARGS="DOWNLOAD_PDF [PROJECT_NAME_OR_ID]" 
-codedx-api-wrapper:latest`
+2. `docker run -v $(pwd):/app/ codedx-api-wrapper:latest download_pdf_report.py [API_KEY] [PROJECT_NAME_OR_ID]`
