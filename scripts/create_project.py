@@ -13,6 +13,7 @@ cdx = CodeDXClient.CodeDX(base_url, args.api_key)
 
 cdx.update_projects()
 
-if args.project not in cdx.projects.get_keys():
+if args.project not in list(cdx.projects):
 	cdx.create_project(args.project)
 
+print(cdx.projects[args.project])
