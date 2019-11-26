@@ -1,7 +1,7 @@
 from apiclient.APIs import CodeDXClient
 import argparse
 
-base_url = "https://codedx101-priv.dsp-techops.broadinstitute.org/codedx"
+base_url = "https://codedx101.dsp-techops.broadinstitute.org/codedx"
 
 parser = argparse.ArgumentParser()
 parser.add_argument('api_key', type=str, help='API key from Code DX')
