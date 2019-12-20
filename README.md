@@ -1,21 +1,17 @@
 # codedx-api-client-python
-### Set Up
-1. Activate a virtual environment
-2. Run `pip install -e .`
-
-### Examples
-1. Open `examples/download-pdf-report.py`
-2. Edit the api_key and base url variables. Enter the project to download.
-3. Run `python3 examples/download-pdf-report.py`.
 
 ### Usage
 
-#### Upload Report / Run Analysis
+First, make sure you have permissions to access project on GCR and that you can [push and pull images](https://cloud.google.com/container-registry/docs/pushing-and-pulling).
 
-1. `docker build --tag codedx-api-wrapper .`
-2. `docker run -v $(pwd):/app/ codedx-api-wrapper:latest upload_analysis_cmd.py [API_KEY] [PROJECT_NAME_OR_ID] [PATH_TO_UPLOAD]`
+#### Pull from GCR
 
-#### Download Report 
+`docker pull gcr.io/dsp-appsec-dev/codedx-api-wrapper:latest`
 
-1. `docker build --tag codedx-api-wrapper .`
-2. `docker run -v $(pwd):/app/ codedx-api-wrapper:latest download_pdf_report.py [API_KEY] [PROJECT_NAME_OR_ID]`
+#### Get Project ID or Create Project if given does not exist
+
+`docker run --name create-project gcr.io/dsp-appsec-dev/codedx-api-wrapper:latest create_project.py [API-KEY] [YOUR-PROJECT-NAME]`
+
+#### Upload security scan report to CodeDX
+
+`docker run -v $(pwd):/app/scripts/reports --name upload-report gcr.io/dsp-appsec-dev/codedx-api-wrapper:latest upload_analysis.py [API-KEY] [PROJECT] [PATH-TO-REPORT]`
