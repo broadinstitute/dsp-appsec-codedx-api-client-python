@@ -1,10 +1,10 @@
 # codedx-api-client-python
 
-### Usage
+## Usage
 
 First, make sure you have permissions to access project on GCR and that you can [push and pull images](https://cloud.google.com/container-registry/docs/pushing-and-pulling).
 
-#### Pull from GCR
+#### Pull Image from GCR
 
 `docker pull gcr.io/dsp-appsec-dev/codedx-api-wrapper:latest`
 
