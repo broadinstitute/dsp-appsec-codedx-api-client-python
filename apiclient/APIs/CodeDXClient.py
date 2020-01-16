@@ -30,15 +30,19 @@ class CodeDX(ProjectsAPI.Projects, ReportsAPI.Reports, JobsAPI.Jobs, AnalysisAPI
 			print("using wb permissions")
 			with open(file_name, 'wb') as f:
 					f.write(data)
-		try:
-			print("using w+ permissions")
-			with open(file_name, 'w+') as f:
-					f.write(data)
-		try:
-			print("adding dir to filename")
-			fn = '~/reports/' + file_name
-			with open(fn 'wb') as f:
-					f.write(data)
+		except:
+			try:
+				print("using w+ permissions")
+				with open(file_name, 'w+') as f:
+						f.write(data)
+			except:
+				try:
+					print("adding dir to filename")
+					fn = '~/reports/' + file_name
+					with open(fn 'wb') as f:
+							f.write(data)
+				except:
+					print("none worked")
 
 	def get_report(self, job, content_type, file_name, msg):
 		""" Get the project report from Code DX
