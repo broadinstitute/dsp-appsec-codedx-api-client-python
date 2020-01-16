@@ -25,35 +25,9 @@ class CodeDX(ProjectsAPI.Projects, ReportsAPI.Reports, JobsAPI.Jobs, AnalysisAPI
 		""" Saves the report in a file.
 		"""
 		self.type_check(file_name, str, "Filename")
-		print(os.getcwd())
-		try:
-			print("using wb permissions")
-			with open(file_name, 'wb') as f:
-					f.write(data)
-		except Exception as e:
-			print(str(e))
-			try:
-				print("using w+ permissions")
-				with open(file_name, 'w+') as f:
-						f.write(data)
-			except Exception as e:
-				print(str(e))
-				try:
-					print("adding dir to filename")
-					fn = os.getcwd() + '/reports/' + file_name
-					with open(fn, 'wb') as f:
-							f.write(data)
-				except Exception as e:
-					print(str(e))
-					try:
-
-						print("adding dir to filename w+")
-						fn = os.getcwd() + '/reports/' + file_name
-						with open(fn, 'w+') as f:
-								f.write(data)
-					except Exception as e:
-						print(str(e))
-						print("none worked")
+		fn = os.getcwd() + '/reports/' + file_name
+		with open(fn, 'wb') as f:
+			f.write(data)
 
 	def get_report(self, job, content_type, file_name, msg):
 		""" Get the project report from Code DX
