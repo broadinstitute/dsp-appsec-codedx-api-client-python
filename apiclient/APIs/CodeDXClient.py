@@ -39,10 +39,16 @@ class CodeDX(ProjectsAPI.Projects, ReportsAPI.Reports, JobsAPI.Jobs, AnalysisAPI
 				try:
 					print("adding dir to filename")
 					fn = '~/reports/' + file_name
-					with open(fn 'wb') as f:
+					with open(fn, 'wb') as f:
 							f.write(data)
 				except:
-					print("none worked")
+					try:
+						print("adding dir to filename w+")
+						fn = '~/reports/' + file_name
+						with open(fn, 'w+') as f:
+								f.write(data)
+					except:
+						print("none worked")
 
 	def get_report(self, job, content_type, file_name, msg):
 		""" Get the project report from Code DX
