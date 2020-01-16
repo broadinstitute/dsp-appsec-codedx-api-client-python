@@ -25,7 +25,7 @@ class CodeDX(ProjectsAPI.Projects, ReportsAPI.Reports, JobsAPI.Jobs, AnalysisAPI
 		""" Saves the report in a file.
 		"""
 		self.type_check(file_name, str, "Filename")
-		with open(file_name, 'w+') as f:
+		with open(file_name, 'wb') as f:
 				f.write(data)
 
 	def get_report(self, job, content_type, file_name, msg):
