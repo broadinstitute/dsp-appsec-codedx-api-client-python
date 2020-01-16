@@ -1,4 +1,5 @@
 from apiclient.APIs import CodeDXClient
+from datetime import date
 import argparse
 
 base_url = "https://codedx101-priv.dsp-techops.broadinstitute.org/codedx"
@@ -11,4 +12,6 @@ args = parser.parse_args()
 
 cdx = CodeDXClient.CodeDX(base_url, args.api_key)
 
-res = cdx.get_pdf(args.project, "detailed", "with-source", True, True, True)
+report_title = args.project + '_report_' + date.today().strftime("%b%d%y") + ".pdf"
+
+res = cdx.get_pdf(args.project, summary_mode="detailed", details_mode="with-source", include_result_details=True, include_comments=True, include_request_response=False, file_name=report_title)
