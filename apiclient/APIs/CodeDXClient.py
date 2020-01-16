@@ -2,19 +2,19 @@ from apiclient.APIs import ProjectsAPI, ReportsAPI, JobsAPI, AnalysisAPI
 import time, os
 
 report_columns = [
-      "projectHierarchy",
-      "id",
-      "creationDate",
-      "updateDate",
-      "severity",
-      "status",
-      "cwe",
-	  "rule",
-      "tool",
-      "location",
-      "element",
-      "loc.path",
-      "loc.line"
+	"projectHierarchy",
+	"id",
+	"creationDate",
+	"updateDate",
+	"severity",
+	"status",
+	"cwe",
+	"rule",
+	"tool",
+	"location",
+	"element",
+	"loc.path",
+	"loc.line"
 ]
 
 class CodeDX(ProjectsAPI.Projects, ReportsAPI.Reports, JobsAPI.Jobs, AnalysisAPI.Analysis):
@@ -25,7 +25,7 @@ class CodeDX(ProjectsAPI.Projects, ReportsAPI.Reports, JobsAPI.Jobs, AnalysisAPI
 		""" Saves the report in a file.
 		"""
 		self.type_check(file_name, str, "Filename")
-		print(os.cwd())
+		print(os.getcwd())
 		try:
 			print("using wb permissions")
 			with open(file_name, 'wb') as f:
