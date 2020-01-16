@@ -38,13 +38,13 @@ class CodeDX(ProjectsAPI.Projects, ReportsAPI.Reports, JobsAPI.Jobs, AnalysisAPI
 			except:
 				try:
 					print("adding dir to filename")
-					fn = '~/reports/' + file_name
+					fn = '/reports/' + file_name
 					with open(fn, 'wb') as f:
 							f.write(data)
 				except:
 					try:
 						print("adding dir to filename w+")
-						fn = '~/reports/' + file_name
+						fn = '/reports/' + file_name
 						with open(fn, 'w+') as f:
 								f.write(data)
 					except:
