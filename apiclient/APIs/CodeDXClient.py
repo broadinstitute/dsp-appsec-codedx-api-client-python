@@ -40,14 +40,15 @@ class CodeDX(ProjectsAPI.Projects, ReportsAPI.Reports, JobsAPI.Jobs, AnalysisAPI
 				print(str(e))
 				try:
 					print("adding dir to filename")
-					fn = '/reports/' + file_name
+					fn = os.getcwd() + '/reports/' + file_name
 					with open(fn, 'wb') as f:
 							f.write(data)
 				except Exception as e:
 					print(str(e))
 					try:
+
 						print("adding dir to filename w+")
-						fn = '/reports/' + file_name
+						fn = os.getcwd() + '/reports/' + file_name
 						with open(fn, 'w+') as f:
 								f.write(data)
 					except Exception as e:
