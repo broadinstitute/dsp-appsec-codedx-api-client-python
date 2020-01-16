@@ -1,4 +1,4 @@
-from apiclient.APIs import ProjectsAPI, ReportsAPI, JobsAPI, AnalysisAPI
+from apiclient.APIs import ProjectsAPI, ReportsAPI, JobsAPI, AnalysisAPI, ActionsAPI
 import time, os
 
 report_columns = [
@@ -17,7 +17,7 @@ report_columns = [
 	"loc.line"
 ]
 
-class CodeDX(ProjectsAPI.Projects, ReportsAPI.Reports, JobsAPI.Jobs, AnalysisAPI.Analysis):
+class CodeDX(ProjectsAPI.Projects, ReportsAPI.Reports, JobsAPI.Jobs, AnalysisAPI.Analysis, ActionsAPI.Actions):
 	def __init__(self, base, api_key, verbose=False):
 		super().__init__(base, api_key, verbose)
 
@@ -97,6 +97,13 @@ class CodeDX(ProjectsAPI.Projects, ReportsAPI.Reports, JobsAPI.Jobs, AnalysisAPI
 			analysis = self.get_analysis(proj, analysis_job["analysisId"])
 			print("Analysis complete.")
 			return analysis
+
+	def update_statuses(self, proj, status="false-positive", filters={}):
+		print("Updating bulk statuses...")
+		job = self.bulk_status_update(proj, status, filters)
+		self.wait_for_job(job, "Waiting for statuses to update...")
+		msg = "Bulk status update (%s) for project %s" % (status, proj)
+		print(msg)
 
 
 
