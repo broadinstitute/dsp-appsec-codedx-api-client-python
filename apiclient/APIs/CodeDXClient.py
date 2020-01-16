@@ -1,5 +1,5 @@
 from apiclient.APIs import ProjectsAPI, ReportsAPI, JobsAPI, AnalysisAPI
-import time
+import time, os
 
 report_columns = [
       "projectHierarchy",
@@ -25,8 +25,20 @@ class CodeDX(ProjectsAPI.Projects, ReportsAPI.Reports, JobsAPI.Jobs, AnalysisAPI
 		""" Saves the report in a file.
 		"""
 		self.type_check(file_name, str, "Filename")
-		with open(file_name, 'wb') as f:
-				f.write(data)
+		print(os.cwd())
+		try:
+			print("using wb permissions")
+			with open(file_name, 'wb') as f:
+					f.write(data)
+		try:
+			print("using w+ permissions")
+			with open(file_name, 'w+') as f:
+					f.write(data)
+		try:
+			print("adding dir to filename")
+			fn = '~/reports/' + file_name
+			with open(fn 'wb') as f:
+					f.write(data)
 
 	def get_report(self, job, content_type, file_name, msg):
 		""" Get the project report from Code DX
