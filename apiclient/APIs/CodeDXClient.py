@@ -30,27 +30,27 @@ class CodeDX(ProjectsAPI.Projects, ReportsAPI.Reports, JobsAPI.Jobs, AnalysisAPI
 			print("using wb permissions")
 			with open(file_name, 'wb') as f:
 					f.write(data)
-		except Exception, e:
+		except Exception as e:
 			print(str(e))
 			try:
 				print("using w+ permissions")
 				with open(file_name, 'w+') as f:
 						f.write(data)
-			except Exception, e:
+			except Exception as e:
 				print(str(e))
 				try:
 					print("adding dir to filename")
 					fn = '/reports/' + file_name
 					with open(fn, 'wb') as f:
 							f.write(data)
-				except Exception, e:
+				except Exception as e:
 					print(str(e))
 					try:
 						print("adding dir to filename w+")
 						fn = '/reports/' + file_name
 						with open(fn, 'w+') as f:
 								f.write(data)
-					except Exception, e:
+					except Exception as e:
 						print(str(e))
 						print("none worked")
 
