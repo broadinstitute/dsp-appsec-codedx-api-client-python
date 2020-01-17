@@ -40,18 +40,18 @@ class Reports(APIClient):
 		res = self.call("GET", local_url)
 		return res
 
-	def generate(self, pid, report_type, config):
+	def generate(self, pid, report_type, config, filters={}):
 		""" Allows user to queue a job to generate a report. 
 			Each report type has a different set of configuration options that can be obtained from the Report Types endpoint.
 		"""
 		params = {}
-		params["filter"] = {}
+		params["filter"] = filters
 		params["config"] = config
 		local_url = '/api/projects/%d/report/%s' % (pid, report_type)
 		res = self.call("POST", local_url, json=params)
 		return res
 
-	def generate_pdf(self, proj, summary_mode="simple", details_mode="with-source", include_result_details=False, include_comments=False, include_request_response=False):
+	def generate_pdf(self, proj, summary_mode="simple", details_mode="with-source", include_result_details=False, include_comments=False, include_request_response=False, filters={}):
 		""" Allows user to queue a job to generate a pdf report. Returns jobId and status.
 			summary_mode <String>: Executive summary. One of "none", "simple", or "detailed". Default is "simple".
 			details_mode <String>: Finding details. One of "none", "simple", or "with-source". Default is "with-source".
@@ -71,7 +71,7 @@ class Reports(APIClient):
 		config["includeComments"] = include_comments
 		self.type_check(include_request_response, bool, "include_request_response")
 		config["includeRequestResponse"] = include_request_response
-		res = self.generate(pid, "pdf", config)
+		res = self.generate(pid, "pdf", config, filters)
 		return res
 
 	def get_csv_columns(self):

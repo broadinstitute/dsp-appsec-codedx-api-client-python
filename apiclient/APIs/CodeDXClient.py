@@ -46,10 +46,10 @@ class CodeDX(ProjectsAPI.Projects, ReportsAPI.Reports, JobsAPI.Jobs, AnalysisAPI
 			job = self.job_status(job["jobId"])
 		return job
 
-	def get_pdf(self, proj, summary_mode="simple", details_mode="with-source", include_result_details=False, include_comments=False, include_request_response=False, file_name='report.pdf'):
+	def get_pdf(self, proj, summary_mode="simple", details_mode="with-source", include_result_details=False, include_comments=False, include_request_response=False, file_name='report.pdf', filters={}):
 		""" Download a project report in PDF format.
 		"""
-		job = self.generate_pdf(proj, summary_mode, details_mode, include_result_details, include_comments, include_request_response)
+		job = self.generate_pdf(proj, summary_mode, details_mode, include_result_details, include_comments, include_request_response, filters)
 		res = self.get_report(job, 'application/pdf', file_name, "Waiting for report generation...")
 		return res
 
