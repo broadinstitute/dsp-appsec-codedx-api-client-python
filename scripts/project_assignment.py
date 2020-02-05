@@ -25,5 +25,5 @@ else:
 		path = issue.find('path')
 		path.text = '/' + args.project + path.text
 
-output_file = args.project + '-output.xml'
+output_file = 'reports/owasp_report.xml'
 tree.write(output_file)
