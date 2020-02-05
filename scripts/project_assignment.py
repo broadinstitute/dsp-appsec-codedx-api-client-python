@@ -5,7 +5,7 @@ parser.add_argument('project', type=str, help='The project')
 parser.add_argument('url', type=str, help='The "joint project" url')
 parser.add_argument('host', type=str, help='The "joint project" host')
 args = parser.parse_args()
-tree = ET.parse('owasp_report.xml')
+tree = ET.parse('reports/owasp_report.xml')
 if tree.getroot().tag == 'OWASPZAPReport': 
 	tree.getroot()[0].set('name', args.url)
 	tree.getroot()[0].set('host', args.host)
