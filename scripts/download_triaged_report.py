@@ -2,7 +2,7 @@ from apiclient.APIs import CodeDXClient
 from datetime import date
 import argparse
 
-base_url = "https://codedx101-priv.dsp-techops.broadinstitute.org/codedx"
+base_url = "https://codedx.dsp-appsec.broadinstitute.org/codedx"
 
 # API key and base url from Code DX
 parser = argparse.ArgumentParser()
