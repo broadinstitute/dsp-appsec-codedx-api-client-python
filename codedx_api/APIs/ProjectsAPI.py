@@ -1,9 +1,9 @@
-from apiclient.apiclient import APIClient
+from codedx_api.APIs.BaseAPIClient import BaseAPIClient
 import json
 import re
 
 # Projects Client for Code DX Projects API
-class Projects(APIClient):
+class Projects(BaseAPIClient):
 	
 	def __init__(self, base, api_key, verbose = False):
 		""" Creates an API Client for Code DX Projects API

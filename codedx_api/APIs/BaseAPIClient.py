@@ -3,7 +3,7 @@ import requests
 import json
 import csv	
 
-class APIClient(object):
+class BaseAPIClient(object):
 
 	def __init__(self, base, api_key, verbose = False):
 		self.verbose = verbose

@@ -1,10 +1,10 @@
-from apiclient.apiclient import APIClient
-from apiclient.APIs import ProjectsAPI
+from codedx_api.APIs.BaseAPIClient import BaseAPIClient
+from codedx_api.APIs.ProjectsAPI import Projects
 import json
 import os
 
 # Actions API Client for Code DX Projects API
-class Actions(APIClient):
+class Actions(BaseAPIClient):
 	
 	def __init__(self, base, api_key, verbose = False):
 		""" Creates an API Client for Code DX Jobs API
@@ -13,7 +13,7 @@ class Actions(APIClient):
 			verbose: Boolean - not supported yet
 		"""
 		super().__init__(base, api_key, verbose)
-		self.projects_api = ProjectsAPI.Projects(base, api_key)
+		self.projects_api = Projects(base, api_key)
 
 	def bulk_status_update(self, proj, status="false-positive", filters={}):
 		""" Create a new Analysis Prep associated with a particular project. 

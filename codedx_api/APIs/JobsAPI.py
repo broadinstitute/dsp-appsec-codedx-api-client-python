@@ -1,8 +1,8 @@
-from apiclient.apiclient import APIClient
+from codedx_api.APIs.BaseAPIClient import BaseAPIClient
 import json
 
 # Jobs API Client for Code DX Projects API
-class Jobs(APIClient):
+class Jobs(BaseAPIClient):
 	
 	def __init__(self, base, api_key, verbose = False):
 		""" Creates an API Client for Code DX Jobs API

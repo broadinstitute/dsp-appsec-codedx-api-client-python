@@ -1,6 +1,7 @@
 import unittest
+import codedx_api
 from unittest.mock import MagicMock, patch
-from apiclient.APIs import ProjectsAPI
+from codedx_api.APIs import ProjectsAPI
 
 # DO NOT UPDATE - MOCK REQUESTS DO NOT REQUIRE CREDENTIALS
 api_key = "0000-0000-0000-0000"

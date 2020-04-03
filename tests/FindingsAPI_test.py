@@ -1,7 +1,7 @@
 import unittest
 import os
-from unittest.mock import MagicMock, patch
-from apiclient.APIs import FindingsAPI
+from mock import MagicMock, patch
+from codedx_api.APIs.FindingsAPI import Findings
 
 # DO NOT UPDATE - MOCK REQUESTS DO NOT REQUIRE CREDENTIALS
 api_key = "0000-0000-0000-0000"
@@ -11,7 +11,7 @@ class FindingsAPI_test(unittest.TestCase):
 
 	def setUp(self):
 		unittest.TestCase.setUp(self)
-		self.findings_api = FindingsAPI.Findings(api_key, base_url)
+		self.findings_api = Findings(api_key, base_url)
 		self.mprojs = {
 			  "projects": [
 			    {

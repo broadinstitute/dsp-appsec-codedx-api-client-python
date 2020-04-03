@@ -1,11 +1,11 @@
-from apiclient.apiclient import APIClient
-from apiclient.APIs import ProjectsAPI
+from codedx_api.APIs.BaseAPIClient import BaseAPIClient
+from codedx_api.APIs.ProjectsAPI import Projects
 
-class Findings(APIClient):
+class Findings(BaseAPIClient):
 	
 	def __init__(self, base, api_key, verbose = False):
 		super().__init__(base, api_key, verbose)
-		self.projects_api = ProjectsAPI.Projects(base, api_key)
+		self.projects_api = Projects(base, api_key)
 	
 	def get_finding(self, fid, options=[]):
 		""" Returns metadata for the given finding.

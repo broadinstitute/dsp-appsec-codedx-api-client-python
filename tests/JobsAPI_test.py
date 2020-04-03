@@ -1,6 +1,6 @@
 import unittest
-from unittest.mock import MagicMock, patch
-from apiclient.APIs import JobsAPI
+from mock import MagicMock, patch
+from codedx_api.APIs import JobsAPI
 
 # DO NOT UPDATE - MOCK REQUESTS DO NOT REQUIRE CREDENTIALS
 api_key = "0000-0000-0000-0000"

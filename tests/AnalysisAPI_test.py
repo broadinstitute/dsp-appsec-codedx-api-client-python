@@ -1,7 +1,7 @@
 import unittest
 import os
-from unittest.mock import MagicMock, patch
-from apiclient.APIs import AnalysisAPI
+from mock import MagicMock, patch
+from codedx_api.APIs.AnalysisAPI import Analysis
 
 # DO NOT UPDATE - MOCK REQUESTS DO NOT REQUIRE CREDENTIALS
 api_key = "0000-0000-0000-0000"
@@ -11,7 +11,7 @@ class AnalysisAPI_test(unittest.TestCase):
 
 	def setUp(self):
 		unittest.TestCase.setUp(self)
-		self.analysis_api = AnalysisAPI.Analysis(api_key, base_url)
+		self.analysis_api = Analysis(api_key, base_url)
 		self.mprojs = {
 			  "projects": [
 			    {

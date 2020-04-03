@@ -1,5 +1,5 @@
-from apiclient.apiclient import APIClient
-from apiclient.APIs import ProjectsAPI
+from codedx_api.APIs.BaseAPIClient import BaseAPIClient
+from codedx_api.APIs.ProjectsAPI import Projects
 import json
 import re
 
@@ -20,7 +20,7 @@ report_columns = [
 ]
 
 # Reports Client for Code DX Projects API
-class Reports(APIClient):
+class Reports(BaseAPIClient):
 	
 	def __init__(self, base, api_key, verbose = False):
 		""" Creates an API Client for Code DX Projects API
@@ -30,7 +30,7 @@ class Reports(APIClient):
 
 		"""
 		super().__init__(base, api_key, verbose)
-		self.projects_api = ProjectsAPI.Projects(base, api_key, verbose)
+		self.projects_api = Projects(base, api_key, verbose)
 
 	def report_types(self, proj):
 		""" Provides a list of report types for a project. 
