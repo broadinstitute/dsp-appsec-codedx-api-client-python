@@ -9,7 +9,7 @@ setup(
     author_email="ssymonds@broadinstitute.org",
     description="CodeDX API Client for Python",
     url="https://github.com/broadinstitute/codedx-api-client",
-    packages=packages,
+    packages=find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: TBD",

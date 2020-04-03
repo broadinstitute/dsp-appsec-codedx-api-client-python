@@ -21,22 +21,14 @@ class CodeDx(ProjectsAPI.Projects, ReportsAPI.Reports, JobsAPI.Jobs, AnalysisAPI
 	def __init__(self, base, api_key, verbose=False):
 		super().__init__(base, api_key, verbose)
 
-	def download_report(self, data, file_name):
+	def download_report(self, data, type, file_name):
 		""" Saves the report in a file.
 		"""
 		self.type_check(file_name, str, "Filename")
 		fn = os.getcwd() + '/reports/' + file_name
 		with open(fn, 'wb') as f:
 			f.write(data)
-
-	def get_report(self, job, content_type, file_name, msg):
-		""" Get the project report from Code DX
-		"""
-		self.wait_for_job(job, msg)
-		print("Downloading report...")
-		res = self.job_result(job["jobId"], content_type)
-		self.download_report(res, file_name)
-		return res
+		return f
 
 	def wait_for_job(self, job, msg):
 		job["status"] = "queued"
@@ -45,6 +37,15 @@ class CodeDx(ProjectsAPI.Projects, ReportsAPI.Reports, JobsAPI.Jobs, AnalysisAPI
 			time.sleep(1)
 			job = self.job_status(job["jobId"])
 		return job
+
+	def get_report(self, job, content_type, file_name, msg):
+		""" Get the project report from Code DX
+		"""
+		self.wait_for_job(job, msg)
+		print("Downloading report...")
+		res = self.job_result(job["jobId"], content_type)
+		self.download_report(res, content_type, file_name)
+		return res
 
 	def get_pdf(self, proj, summary_mode="simple", details_mode="with-source", include_result_details=False, include_comments=False, include_request_response=False, file_name='report.pdf', filters={}):
 		""" Download a project report in PDF format.
@@ -70,10 +71,10 @@ class CodeDx(ProjectsAPI.Projects, ReportsAPI.Reports, JobsAPI.Jobs, AnalysisAPI
 		res = self.download_report(job, 'text/xml', file_name)
 		return res
 
-	def get_nessus():
+	def get_nessus(self):
 		pass
 
-	def get_nbe():
+	def get_nbe(self):
 		pass
 
 	def analyze(self, proj, file_name):
@@ -93,7 +94,7 @@ class CodeDx(ProjectsAPI.Projects, ReportsAPI.Reports, JobsAPI.Jobs, AnalysisAPI
 			raise Exception("Fix verification errors...")
 		else:
 			analysis_job = self.run_analysis(prep_id)
-			job = self.wait_for_job(analysis_job, "Running analysis...")
+			self.wait_for_job(analysis_job, "Running analysis...")
 			analysis = self.get_analysis(proj, analysis_job["analysisId"])
 			print("Analysis complete.")
 			return analysis
