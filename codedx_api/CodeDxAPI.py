@@ -30,6 +30,14 @@ class CodeDx(ProjectsAPI.Projects, ReportsAPI.Reports, JobsAPI.Jobs, AnalysisAPI
 			f.write(data)
 		return f
 
+	def wait_for_job(self, job, msg):
+		job["status"] = "queued"
+		while job["status"] != "completed":
+			print(msg)
+			time.sleep(1)
+			job = self.job_status(job["jobId"])
+		return job
+
 	def get_report(self, job, content_type, file_name, msg):
 		""" Get the project report from Code DX
 		"""
@@ -38,14 +46,6 @@ class CodeDx(ProjectsAPI.Projects, ReportsAPI.Reports, JobsAPI.Jobs, AnalysisAPI
 		res = self.job_result(job["jobId"], content_type)
 		self.download_report(res, content_type, file_name)
 		return res
-x
-	def wait_for_job(self, job, msg):
-		job["status"] = "queued"
-		while job["status"] != "completed":
-			print(msg)
-			time.sleep(1)
-			job = self.job_status(job["jobId"])
-		return job
 
 	def get_pdf(self, proj, summary_mode="simple", details_mode="with-source", include_result_details=False, include_comments=False, include_request_response=False, file_name='report.pdf', filters={}):
 		""" Download a project report in PDF format.
