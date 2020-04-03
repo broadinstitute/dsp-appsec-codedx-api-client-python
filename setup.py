@@ -10,6 +10,12 @@ setup(
     description="CodeDX API Client for Python",
     url="https://github.com/broadinstitute/codedx-api-client",
     packages=find_packages(),
+    install_requires=[
+        'requests',
+        'json',
+        'csv',
+        're'
+    ],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: TBD",
