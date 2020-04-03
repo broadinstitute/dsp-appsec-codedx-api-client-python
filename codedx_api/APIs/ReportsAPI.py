@@ -36,6 +36,7 @@ class Reports(BaseAPIClient):
 		""" Provides a list of report types for a project. 
 			Each report type (pdf, csv, xml, nessus, and nbe) has a different set of configuration options. These configuration options are important with respect to generating a report.
 		"""
+		pid = self.projects_api.process_project(proj)
 		local_url = '/api/projects/%d/report/types' % pid
 		res = self.call("GET", local_url)
 		return res
@@ -110,7 +111,7 @@ class Reports(BaseAPIClient):
 		res = self.generate(pid, "xml", config)
 		return res
 
-	def generate_nessus(self, proj, default_host=None, operating_system="", macAddress="", netBIOS_name=""):
+	def generate_nessus(self, proj, default_host=None, operating_system="", mac_address="", netBIOS_name=""):
 		""" Allows user to queue a job to generate a nessus report. Returns jobId and status.
 			default_host <String>: Default host. Required.
 			operating_system <String>: Operating System. Default is "".
