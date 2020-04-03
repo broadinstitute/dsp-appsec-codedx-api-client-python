@@ -31,14 +31,6 @@ class BaseAPIClient(object):
 			headers[key] = local_headers[key]
 		return headers
 
-	def pretty_print(self, req):
-		print('{}\n{}\n{}\n\n{}'.format(
-	        '---------------REQUEST-------------',
-	        req.method + ' ' + req.url,
-	        '\n'.join('{}: {}'.format(k, v) for k, v in req.headers.items()),
-	        req.body,
-	    ))
-
 	def type_check(self, inp, t, field):
 		if not isinstance(inp, t):
 			msg = "%s is not of type %s" % (field, t)
@@ -72,7 +64,6 @@ class BaseAPIClient(object):
 	def _put(self, url, headers, json, content_type):		
 		if self.verbose:
 			req = requests.Request('PUT',url,headers=headers,json=json)
-			self.pretty_print(req.prepare())
 		res = APIResponse(requests.put(url,headers=headers,json=json), content_type)
 		return res.getData()
 
