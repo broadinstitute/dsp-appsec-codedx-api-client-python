@@ -32,16 +32,13 @@ The methods return data according to the schema seen in the CodeDx API Guide. Fo
 
 The docker image includes the preinstalled library and includes example scripts for common tasks. 
 
-### Interactive Python Session
-
-
 ### Pull Image from GCR
 
 First, make sure you have permissions to access the project on GCR and that you can [push and pull images](https://cloud.google.com/container-registry/docs/pushing-and-pulling).
 
 `docker pull gcr.io/dsp-appsec-dev/codedx-api-wrapper:latest`
 
-### Run library in docker
+### Interactive Python Session
 
 ```
 docker run -it --name codedx-tasks gcr.io/dsp-appsec-dev/codedx-api-wrapper:latest
