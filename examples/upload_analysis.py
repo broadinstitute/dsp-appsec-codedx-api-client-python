@@ -1,11 +1,14 @@
-from apiclient.APIs import CodeDXClient
+from codedx_api import CodeDxAPI
+import argparse
 
-# API key and base url from Code DX
-api_key = ""
-base_url = ""
-project = ""
-file_name = ""
+base_url = "https://codedx.dsp-appsec.broadinstitute.org/codedx"
 
-cdx = CodeDXClient.CodeDX(base_url, api_key)
+parser = argparse.ArgumentParser()
+parser.add_argument('api_key', type=str, help='API key from Code DX')
+parser.add_argument('project', type=str, help='Code DX project name or id')
+parser.add_argument('file_name', type=str, help='File name to upload')
+args = parser.parse_args()
 
-res = cdx.analyze(project, file_name)
+cdx = CodeDxAPI.CodeDx(base_url, args.api_key)
+
+res = cdx.analyze(args.project, args.file_name)

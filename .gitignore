@@ -1,5 +1,4 @@
 venv/
-apiclient.apiclient.egg-info/
-apiclient.egg-info/
+*.pyc
 __pycache__/
 *.DS_Store

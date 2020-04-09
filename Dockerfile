@@ -6,5 +6,5 @@ RUN pip install -r requirements.txt
 RUN python3 setup.py install
 EXPOSE 5000
 USER codedxuser
-WORKDIR /app/scripts/
+WORKDIR /app/examples/
 ENTRYPOINT ["python3"]
