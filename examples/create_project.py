@@ -1,4 +1,4 @@
-from apiclient.APIs import CodeDXClient
+from codedx_api import CodeDxAPI
 import argparse
 
 base_url = "https://codedx.dsp-appsec.broadinstitute.org/codedx"
@@ -9,7 +9,7 @@ parser.add_argument('api_key', type=str, help='API from Code DX')
 parser.add_argument('project', type=str, help='Code DX project name')
 args = parser.parse_args()
 
-cdx = CodeDXClient.CodeDX(base_url, args.api_key)
+cdx = CodeDxAPI.CodeDx(base_url, args.api_key)
 
 cdx.update_projects()
 
