@@ -25,7 +25,7 @@ class CodeDx(ProjectsAPI.Projects, ReportsAPI.Reports, JobsAPI.Jobs, AnalysisAPI
 		""" Saves the report in a file.
 		"""
 		self.type_check(file_name, str, "Filename")
-		fn = os.getcwd() + '/reports/' + file_name
+		fn = os.getcwd() + file_name
 		with open(fn, 'wb') as f:
 			f.write(data)
 		return f
