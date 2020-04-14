@@ -25,8 +25,7 @@ class CodeDx(ProjectsAPI.Projects, ReportsAPI.Reports, JobsAPI.Jobs, AnalysisAPI
 		""" Saves the report in a file.
 		"""
 		self.type_check(file_name, str, "Filename")
-		fn = os.getcwd() + file_name
-		with open(fn, 'wb') as f:
+		with open(file_name, 'wb') as f:
 			f.write(data)
 		return f
 
@@ -44,8 +43,8 @@ class CodeDx(ProjectsAPI.Projects, ReportsAPI.Reports, JobsAPI.Jobs, AnalysisAPI
 		self.wait_for_job(job, msg)
 		print("Downloading report...")
 		res = self.job_result(job["jobId"], content_type)
-		self.download_report(res, content_type, file_name)
-		return res
+		file = self.download_report(res, content_type, file_name)
+		return file
 
 	def get_pdf(self, proj, summary_mode="simple", details_mode="with-source", include_result_details=False, include_comments=False, include_request_response=False, file_name='report.pdf', filters={}):
 		""" Download a project report in PDF format.
