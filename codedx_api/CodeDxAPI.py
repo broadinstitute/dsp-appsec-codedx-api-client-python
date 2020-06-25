@@ -19,7 +19,7 @@ report_columns = [
 
 class CodeDx(ProjectsAPI.Projects, ReportsAPI.Reports, JobsAPI.Jobs, AnalysisAPI.Analysis, ActionsAPI.Actions):
 	def __init__(self, base, api_key, verbose=False):
-		"""Create a codeDx APIclient"""
+		"""Create a codeDx APIclient."""
 		super().__init__(base, api_key, verbose)
 
 	def download_report(self, data, file_name):
