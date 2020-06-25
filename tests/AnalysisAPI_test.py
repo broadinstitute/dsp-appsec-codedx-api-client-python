@@ -1,7 +1,7 @@
 import unittest
-import os
-from mock import MagicMock, patch
+from mock import patch
 from codedx_api.APIs.AnalysisAPI import Analysis
+import os
 
 # DO NOT UPDATE - MOCK REQUESTS DO NOT REQUIRE CREDENTIALS
 api_key = "0000-0000-0000-0000"
@@ -215,7 +215,7 @@ class AnalysisAPI_test(unittest.TestCase):
 		with self.assertRaises(Exception):
 			self.analysis_api.toggle_display_tag('1234', 'inputId', 1234, True)
 		with self.assertRaises(Exception):
-			self.analysis_api.toggle_display_tag('1234', 'inputId', 'tagID', None)						
+			self.analysis_api.toggle_display_tag('1234', 'inputId', 'tagID', None)
 
 	@patch('requests.put')
 	def test_enable_display_tag(self, mock_enable_display_tag):
@@ -303,7 +303,7 @@ class AnalysisAPI_test(unittest.TestCase):
 		with self.assertRaises(Exception):
 			self.analysis_api.disable_display_tag('1234', 1234, 'tagID')
 		with self.assertRaises(Exception):
-			self.analysis_api.disable_display_tag('1234', 'inputId', 1234)	
+			self.analysis_api.disable_display_tag('1234', 'inputId', 1234)
 
 	@patch('requests.get')
 	def test_get_all_analysis(self, mock_get_all_analysis):
@@ -371,7 +371,7 @@ class AnalysisAPI_test(unittest.TestCase):
 		with self.assertRaises(Exception):
 			self.analysis_api.name_analysis('MockProj', None, 'NewName')
 		with self.assertRaises(Exception):
-			self.analysis_api.name_analysis('MockProj', 1, None)	
+			self.analysis_api.name_analysis('MockProj', 1, None)
 
 if __name__ == '__main__':
     unittest.main()

@@ -6,13 +6,13 @@ This is an python client for the CodeDx API. See the [CodeDx API Guide](https://
 
 Install the library using `pip3`
 
-```
+```bash
 pip3 install git+https://github.com/broadinstitute/dsp-appsec-codedx-api-client-python.git
 ```
 
 You can then make API calls using the library. See below for an example.
 
-```
+```python
 from codedx_api import CodeDxAPI
 
 cdx = CodeDxAPI.CodeDx([YOUR-CODEDX-URL], [CODEDX-API-KEY])
@@ -21,7 +21,7 @@ cdx.create_project('WebGoat')
 ```
 
 The methods return data according to the schema seen in the CodeDx API Guide. For example, the `create_projects` call returns:
-```
+```json
 {
   "id": 1,
   "name": "WebGoat"
@@ -40,7 +40,7 @@ First, make sure you have permissions to access the project on GCR and that you 
 
 ### Interactive Python Session
 
-```
+```python
 docker run -it --name codedx-tasks gcr.io/dsp-appsec-dev/codedx-api-wrapper:latest
 >>> from codedx_api import CodeDxAPI
 >>> cdx = CodeDxAPI.CodeDx([YOUR-CODEDX-URL], [CODEDX-API-KEY])
@@ -50,10 +50,10 @@ docker run -it --name codedx-tasks gcr.io/dsp-appsec-dev/codedx-api-wrapper:late
 
 ### Run sample scripts
 
-##### Get Project ID or Create Project if given does not exist
+#### Get Project ID or Create Project if given does not exist
 
 `docker run --name create-project gcr.io/dsp-appsec-dev/codedx-api-wrapper:latest create_project.py [API-KEY] [YOUR-PROJECT-NAME]`
 
-##### Upload security scan report to CodeDX
+#### Upload security scan report to CodeDX
 
 `docker run -v $(pwd):/app/scripts/reports --name upload-report gcr.io/dsp-appsec-dev/codedx-api-wrapper:latest upload_analysis.py [API-KEY] [PROJECT] [PATH-TO-REPORT]`

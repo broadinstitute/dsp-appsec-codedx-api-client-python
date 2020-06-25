@@ -1,29 +1,29 @@
 from codedx_api.APIs.BaseAPIClient import BaseAPIClient
 from codedx_api.APIs.ProjectsAPI import Projects
-import json
 import re
 
 report_columns = [
-      "projectHierarchy",
-      "id",
-      "creationDate",
-      "updateDate",
-      "severity",
-      "status",
-      "cwe",
-	  "rule",
-      "tool",
-      "location",
-      "element",
-      "loc.path",
-      "loc.line"
+    "projectHierarchy",
+    "id",
+    "creationDate",
+    "updateDate",
+    "severity",
+    "status",
+    "cwe",
+	"rule",
+    "tool",
+    "location",
+    "element",
+    "loc.path",
+    "loc.line"
 ]
 
 # Reports Client for Code DX Projects API
 class Reports(BaseAPIClient):
-	
 	def __init__(self, base, api_key, verbose = False):
 		""" Creates an API Client for Code DX Projects API
+
+			Args:
 				base: String representing base url from Code DX
 				api_key: String representing API key from Code DX
 				verbose: Boolean - not supported yet
@@ -33,34 +33,43 @@ class Reports(BaseAPIClient):
 		self.projects_api = Projects(base, api_key, verbose)
 
 	def report_types(self, proj):
-		""" Provides a list of report types for a project. 
+		""" Provides a list of report types for a project.
+
 			Each report type (pdf, csv, xml, nessus, and nbe) has a different set of configuration options. These configuration options are important with respect to generating a report.
+
 		"""
 		pid = self.projects_api.process_project(proj)
 		local_url = '/api/projects/%d/report/types' % pid
 		res = self.call("GET", local_url)
 		return res
 
-	def generate(self, pid, report_type, config, filters={}):
-		""" Allows user to queue a job to generate a report. 
+	def generate(self, pid, report_type, config, filters=None):
+		""" Allows user to queue a job to generate a report.
+
 			Each report type has a different set of configuration options that can be obtained from the Report Types endpoint.
-		"""
+
+å		"""
 		params = {}
 		params["filter"] = filters
 		params["config"] = config
+		if not filters: filters = {}
 		local_url = '/api/projects/%d/report/%s' % (pid, report_type)
-		res = self.call("POST", local_url, json=params)
+		res = self.call("POST", local_url, json_data=params)
 		return res
 
-	def generate_pdf(self, proj, summary_mode="simple", details_mode="with-source", include_result_details=False, include_comments=False, include_request_response=False, filters={}):
+	def generate_pdf(self, proj, summary_mode="simple", details_mode="with-source", include_result_details=False, include_comments=False, include_request_response=False, filters=None):
 		""" Allows user to queue a job to generate a pdf report. Returns jobId and status.
-			summary_mode <String>: Executive summary. One of "none", "simple", or "detailed". Default is "simple".
-			details_mode <String>: Finding details. One of "none", "simple", or "with-source". Default is "with-source".
-			include_result_details <Boolean>: Include result provided details. Default is false.
-			include_comments <Boolean>: Include comments. Default is false.
-			include_request_response <Boolean>: Include HTTP requests and responses. Default is false.
+
+			Args:
+				summary_mode <String>: Executive summary. One of "none", "simple", or "detailed". Default is "simple".
+				details_mode <String>: Finding details. One of "none", "simple", or "with-source". Default is "with-source".
+				include_result_details <Boolean>: Include result provided details. Default is false.
+				include_comments <Boolean>: Include comments. Default is false.
+				include_request_response <Boolean>: Include HTTP requests and responses. Default is false.
+
 		"""
 		pid = self.projects_api.process_project(proj)
+		if not filters: filters = {}
 		config = {}
 		if summary_mode not in ["none", "simple", "detailed"]: raise Exception("Invalid summary mode input.")
 		config["summaryMode"] = summary_mode
@@ -76,18 +85,19 @@ class Reports(BaseAPIClient):
 		return res
 
 	def get_csv_columns(self):
-		""" Returns a list of optional columns for a project csv report. 
-		"""
+		""" Returns a list of optional columns for a project csv report."""
 		return report_columns
 
-	def generate_csv(self, proj, cols=report_columns):
+	def generate_csv(self, proj, cols=None):
 		""" Allows user to queue a job to generate a csv report. Returns jobId and status.
+
 			Accepts a list of columns to include in the report. Default is all columns.
 			Call get_csv_columns() to see column options.
+
 		"""
 		pid = self.projects_api.process_project(proj)
 		config = {}
-		if not cols: raise Exception("CSV report needs at least one column.")
+		if not cols: cols = report_columns
 		for col in cols:
 			if col not in report_columns: raise Exception("Invaild column name.")
 		config["columns"] = cols
@@ -96,9 +106,12 @@ class Reports(BaseAPIClient):
 
 	def generate_xml(self, proj, include_standards=False, include_source=False, include_rule_descriptions=True):
 		""" Allows user to queue a job to generate an xml report. Returns jobId and status.
-			include_standards <Boolean>: List standards violations. Default is fault.
-			include_source <Boolean>: Include source code snippets. Default is false.
-			include_rule_descriptions <Boolean>: Include rule descriptions. Default is true.
+
+			Args:
+				include_standards <Boolean>: List standards violations. Default is fault.
+				include_source <Boolean>: Include source code snippets. Default is false.
+				include_rule_descriptions <Boolean>: Include rule descriptions. Default is true.
+
 		"""
 		pid = self.projects_api.process_project(proj)
 		config = {}
@@ -113,10 +126,13 @@ class Reports(BaseAPIClient):
 
 	def generate_nessus(self, proj, default_host=None, operating_system="", mac_address="", netBIOS_name=""):
 		""" Allows user to queue a job to generate a nessus report. Returns jobId and status.
-			default_host <String>: Default host. Required.
-			operating_system <String>: Operating System. Default is "".
-			mac_address <String>: mac address. Required.
-			netBIOS_name <String>: NetBIOS name. Defualt is "".
+
+			Args:
+				default_host <String>: Default host. Required.
+				operating_system <String>: Operating System. Default is "".
+				mac_address <String>: mac address. Required.
+				netBIOS_name <String>: NetBIOS name. Defualt is "".
+
 		"""
 		pid = self.projects_api.process_project(proj)
 		config = {}
@@ -135,7 +151,10 @@ class Reports(BaseAPIClient):
 
 	def generate_nbe(self, proj, host_address=None):
 		""" Allows user to queue a job to generate an AlienVault/NBE report. Returns jobId and status.
-			host_address <String>: Host IP address. Required.
+
+			Args:
+				host_address <String>: Host IP address. Required.
+
 		"""
 		pid = self.projects_api.process_project(proj)
 		config = {}
