@@ -259,7 +259,7 @@ class AnalysisAPI_test(unittest.TestCase):
 		with self.assertRaises(Exception):
 			self.analysis_api.enable_display_tag('1234', 1234, 'tagID')
 		with self.assertRaises(Exception):
-			self.analysis_api.enable_display_tag('1234', 'inputId', 1234)	
+			self.analysis_api.enable_display_tag('1234', 'inputId', 1234)
 
 	@patch('requests.put')
 	def test_disable_display_tag(self, mock_disable_display_tag):

@@ -6,7 +6,7 @@ class Findings(BaseAPIClient):
 		"""Iniitilize"""
 		super().__init__(base, api_key, verbose)
 		self.projects_api = Projects(base, api_key)
-	
+
 	def get_finding(self, fid, options=None):
 		""" Returns metadata for the given finding.
 

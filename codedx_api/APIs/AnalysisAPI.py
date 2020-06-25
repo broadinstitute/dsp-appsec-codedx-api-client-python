@@ -183,7 +183,7 @@ class Analysis(BaseAPIClient):
 	
 		"""
 		res = self.toggle_display_tag(prep_id, input_id, tag_id, True)
-		return res	
+		return res
 
 	def disable_display_tag(self, prep_id, input_id, tag_id):
 		""" Enable individual display tags on individual prop inputs.
@@ -270,8 +270,3 @@ class Analysis(BaseAPIClient):
 		params = {"name": name}
 		res = self.call("PUT", local_path=local_url, json_data=params, content_type=None)
 		return res
-
-
-
-
-

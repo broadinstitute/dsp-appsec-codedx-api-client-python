@@ -2,22 +2,6 @@ from codedx_api.APIs.BaseAPIClient import BaseAPIClient
 from codedx_api.APIs.ProjectsAPI import Projects
 import re
 
-report_columns = [
-    "projectHierarchy",
-    "id",
-    "creationDate",
-    "updateDate",
-    "severity",
-    "status",
-    "cwe",
-	"rule",
-    "tool",
-    "location",
-    "element",
-    "loc.path",
-    "loc.line"
-]
-
 # Reports Client for Code DX Projects API
 class Reports(BaseAPIClient):
 	def __init__(self, base, api_key, verbose = False):
@@ -30,6 +14,21 @@ class Reports(BaseAPIClient):
 
 		"""
 		super().__init__(base, api_key, verbose)
+		self.report_columns = [
+			"projectHierarchy",
+			"id",
+			"creationDate",
+			"updateDate",
+			"severity",
+			"status",
+			"cwe",
+			"rule",
+			"tool",
+			"location",
+			"element",
+			"loc.path",
+			"loc.line"
+		]
 		self.projects_api = Projects(base, api_key, verbose)
 
 	def report_types(self, proj):
@@ -86,7 +85,7 @@ class Reports(BaseAPIClient):
 
 	def get_csv_columns(self):
 		""" Returns a list of optional columns for a project csv report."""
-		return report_columns
+		return self.report_columns
 
 	def generate_csv(self, proj, cols=None):
 		""" Allows user to queue a job to generate a csv report. Returns jobId and status.
@@ -97,9 +96,9 @@ class Reports(BaseAPIClient):
 		"""
 		pid = self.projects_api.process_project(proj)
 		config = {}
-		if not cols: cols = report_columns
+		if not cols: cols = self.report_columns
 		for col in cols:
-			if col not in report_columns: raise Exception("Invaild column name.")
+			if col not in self.report_columns: raise Exception("Invaild column name.")
 		config["columns"] = cols
 		res = self.generate(pid, "csv", config)
 		return res

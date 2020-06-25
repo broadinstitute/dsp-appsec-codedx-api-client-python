@@ -60,13 +60,15 @@ class CodeDx(ProjectsAPI.Projects, ReportsAPI.Reports, JobsAPI.Jobs, AnalysisAPI
 		return res
 
 	def get_xml(self, proj, include_standards=False, include_source=False, include_rule_descriptions=True, file_name='report.xml'):
-		""" Allows user to queue a job to generate an xml report. Returns jobId and status.
+		""" Allows user to queue a job to generate an xml report.
 
 			Args:
 				include_standards <Boolean>: List standards violations. Default is fault.
 				include_source <Boolean>: Include source code snippets. Default is false.
 				include_rule_descriptions <Boolean>: Include rule descriptions. Default is true.
 
+			Returns jobId and status.
+			
 		"""
 		job = self.generate_xml(proj, include_standards, include_source, include_rule_descriptions)
 		res = self.download_report(job, file_name)
@@ -99,7 +101,8 @@ class CodeDx(ProjectsAPI.Projects, ReportsAPI.Reports, JobsAPI.Jobs, AnalysisAPI
 			print("Analysis complete.")
 			return analysis
 
-	def update_statuses(self, proj, status="false-positive", filters={}):
+	def update_statuses(self, proj, status="false-positive", filters=None):
+		if not filters: filters = {}
 		print("Updating bulk statuses...")
 		job = self.bulk_status_update(proj, status, filters)
 		self.wait_for_job(job, "Waiting for statuses to update...")
