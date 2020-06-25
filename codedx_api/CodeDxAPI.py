@@ -67,8 +67,7 @@ class CodeDx(ProjectsAPI.Projects, ReportsAPI.Reports, JobsAPI.Jobs, AnalysisAPI
 				include_source <Boolean>: Include source code snippets. Default is false.
 				include_rule_descriptions <Boolean>: Include rule descriptions. Default is true.
 
-			Returns jobId and status.
-			
+			Returns jobId and status.	
 		"""
 		job = self.generate_xml(proj, include_standards, include_source, include_rule_descriptions)
 		res = self.download_report(job, file_name)

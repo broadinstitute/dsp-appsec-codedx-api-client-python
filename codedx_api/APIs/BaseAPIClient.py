@@ -101,4 +101,3 @@ class APIResponse(object):
 
 	def getData(self):
 		return self.data
-

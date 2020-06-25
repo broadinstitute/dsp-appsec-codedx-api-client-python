@@ -270,8 +270,3 @@ class Analysis(BaseAPIClient):
 		params = {"name": name}
 		res = self.call("PUT", local_path=local_url, json_data=params, content_type=None)
 		return res
-
-
-
-
-
