@@ -31,7 +31,8 @@ class BaseAPIClient(object):
 			headers[key] = local_headers[key]
 		return headers
 
-	def type_check(self, inp, t, field):
+	@staticmethod
+	def type_check(inp, t, field):
 		if not isinstance(inp, t):
 			msg = "%s is not of type %s" % (field, t)
 			raise Exception(msg)
@@ -67,7 +68,8 @@ class BaseAPIClient(object):
 		res = APIResponse(requests.put(url,headers=headers,json=json_data), content_type)
 		return res.getData()
 
-	def _delete(self, url, headers, json_data, content_type):
+	@staticmethod
+	def _delete(url, headers, json_data, content_type):
 		res = APIResponse(requests.delete(url, headers=headers), None)
 		return res.getData()
 
@@ -77,8 +79,8 @@ class BaseAPIClient(object):
 		return self.commands[method](url, headers, json_data, content_type)
 
 class APIResponse(object):
-
 	def __init__(self, response, content_type):
+		"""Initialize API Response"""
 		self.content_type = content_type
 		self.validate(response)
 		self.status = response.status_code

@@ -205,7 +205,6 @@ class Projects(BaseAPIClient):
 		"""
 		res = self.update_user_roles(proj, uid, roles, True)
 		return res
-		
 
 	def rem_user_roles(self, proj, uid, roles):
 		""" Update a user by removing roles.
