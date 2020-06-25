@@ -1,6 +1,5 @@
 import unittest
-import os
-from mock import MagicMock, patch
+from mock import patch
 from codedx_api.APIs.FindingsAPI import Findings
 
 # DO NOT UPDATE - MOCK REQUESTS DO NOT REQUIRE CREDENTIALS
@@ -206,7 +205,9 @@ class FindingsAPI_test(unittest.TestCase):
 		mock_get_finding_file.return_value.status_code = 200
 		mock_get_finding_file.return_value.headers= {"Content-Type": 'application/json;charset=utf-8'}
 		result = self.findings_api.get_finding_file(self.mprojs["projects"][0]["id"], "file")
+		self.assertTrue(result)
 		result = self.findings_api.get_finding_file(self.mprojs["projects"][0]["id"], 1)
+		self.assertTrue(result)
 		with self.assertRaises(Exception):
 			self.findings_api.get_finding_file(1, [])
 		with self.assertRaises(Exception):

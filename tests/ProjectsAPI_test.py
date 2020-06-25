@@ -1,6 +1,5 @@
 import unittest
-import codedx_api
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 from codedx_api.APIs import ProjectsAPI
 
 # DO NOT UPDATE - MOCK REQUESTS DO NOT REQUIRE CREDENTIALS
@@ -413,7 +412,7 @@ class ProjectsAPI_test(unittest.TestCase):
 		with self.assertRaises(Exception):
 			self.proj_api.query_base('/api/projects/query', None, None, None, 2, -20)
 		with self.assertRaises(Exception):
-			self.proj_api.query_base('/api/projects/query', None, None, "bad parentid", None, None)	
+			self.proj_api.query_base('/api/projects/query', None, None, "bad parentid", None, None)
 		with self.assertRaises(Exception):
 			self.proj_api.query_base('/api/projects/query', None, 5, None, None, None)
 

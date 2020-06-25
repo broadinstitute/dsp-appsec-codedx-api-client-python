@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 packages = ["codedx_api"]
 
 setup(
-    name='codedx_api',  
+    name='codedx_api',
     version='0.1',
     author="Sarada Symonds",
     author_email="ssymonds@broadinstitute.org",
