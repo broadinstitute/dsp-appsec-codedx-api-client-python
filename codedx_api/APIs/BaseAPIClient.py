@@ -37,14 +37,17 @@ class BaseAPIClient(object):
 			raise Exception(msg)
 		return True
 
+	@classmethod
 	def _get(self, url, headers, json_data, content_type):
 		res = APIResponse(requests.get(url, headers=headers), content_type)
 		return res.getData()
 
+	@classmethod
 	def _post(self, url, headers, json_data, content_type):
 		res = APIResponse(requests.post(url, headers=headers, json=json_data), content_type)
 		return res.getData()
 
+	@classmethod
 	def _upload(self, url, headers, json_data, content_type):
 		if 'file_name' not in json_data or 'file_path' not in json_data or 'file_type' not in json_data:
 			raise Exception("Missing file data.")
@@ -60,10 +63,12 @@ class BaseAPIClient(object):
 		f.close()
 		return res.getData()
 
+	@classmethod
 	def _put(self, url, headers, json_data, content_type):
 		res = APIResponse(requests.put(url,headers=headers,json=json_data), content_type)
 		return res.getData()
 
+	@classmethod
 	def _delete(self, url, headers, json_data, content_type):
 		res = APIResponse(requests.delete(url, headers=headers), None)
 		return res.getData()
