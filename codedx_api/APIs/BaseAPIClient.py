@@ -37,11 +37,13 @@ class BaseAPIClient(object):
 			raise Exception(msg)
 		return True
 
-	def _get(self, url, headers, json_data, content_type):
+	@staticmethod
+	def _get(url, headers, json_data, content_type):
 		res = APIResponse(requests.get(url, headers=headers), content_type)
 		return res.getData()
 
-	def _post(self, url, headers, json_data, content_type):
+	@staticmethod
+	def _post(url, headers, json_data, content_type):
 		res = APIResponse(requests.post(url, headers=headers, json=json_data), content_type)
 		return res.getData()
 
@@ -60,7 +62,8 @@ class BaseAPIClient(object):
 		f.close()
 		return res.getData()
 
-	def _put(self, url, headers, json_data, content_type):
+	@staticmethod
+	def _put(url, headers, json_data, content_type):
 		res = APIResponse(requests.put(url,headers=headers,json=json_data), content_type)
 		return res.getData()
 
