@@ -50,7 +50,7 @@ class BaseAPIClient(object):
 			raise Exception("Missing file data.")
 		headers = {'API-Key': self.api_key, 
 			'accept': 'application/json'}
-		if 'X-Client-Request-Id' in json:
+		if 'X-Client-Request-Id' in json_data:
 			headers['X-Client-Request-Id'] = json_data['X-Client-Request-Id']
 		f = open(json_data['file_path'], 'rb')
 		files = {

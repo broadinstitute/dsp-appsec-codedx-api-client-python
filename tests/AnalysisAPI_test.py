@@ -1,6 +1,7 @@
 import unittest
 from mock import patch
 from codedx_api.APIs.AnalysisAPI import Analysis
+import os
 
 # DO NOT UPDATE - MOCK REQUESTS DO NOT REQUIRE CREDENTIALS
 api_key = "0000-0000-0000-0000"

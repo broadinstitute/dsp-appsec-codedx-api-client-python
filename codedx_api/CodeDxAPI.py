@@ -48,7 +48,7 @@ class CodeDx(ProjectsAPI.Projects, ReportsAPI.Reports, JobsAPI.Jobs, AnalysisAPI
 		self.wait_for_job(job, msg)
 		print("Downloading report...")
 		res = self.job_result(job["jobId"], content_type)
-		file = self.download_report(res, content_type, file_name)
+		file = self.download_report(res, file_name)
 		return file
 
 	def get_pdf(self, proj, summary_mode="simple", details_mode="with-source", include_result_details=False, include_comments=False, include_request_response=False, file_name='report.pdf', filters=None):
@@ -75,7 +75,7 @@ class CodeDx(ProjectsAPI.Projects, ReportsAPI.Reports, JobsAPI.Jobs, AnalysisAPI
 
 		"""
 		job = self.generate_xml(proj, include_standards, include_source, include_rule_descriptions)
-		res = self.download_report(job, 'text/xml', file_name)
+		res = self.download_report(job, file_name)
 		return res
 
 	def get_nessus(self):
