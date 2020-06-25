@@ -15,14 +15,14 @@ class Jobs(BaseAPIClient):
 
 
 	def job_status(self, jid):
-		"""Queries the status of a job"""
+		"""Queries the status of a job."""
 		self.type_check(jid, str, "JobId")
 		local_url = '/api/jobs/%s' % jid
 		res = self.call("GET", local_url)
 		return res
 
 	def job_result(self, jid, accept='application/json;charset=utf-8'):
-		"""Get the result of a job"""
+		"""Get the result of a job."""
 		local_url = '/api/jobs/%s/result' % jid
 		res = self.call("GET", local_url, content_type=accept)
 		return res

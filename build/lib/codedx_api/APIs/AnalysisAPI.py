@@ -105,7 +105,7 @@ class Analysis(BaseAPIClient):
 		self.type_check(enabled, bool, "Enable/disable boolean")
 		local_url = '/api/analysis-prep/%s/%s/tag/%s' % (prep_id, input_id, tag_id)
 		params = {"enabled": enabled}
-		res = self.call("PUT", local_path=local_url, json=params)
+		res = self.call("PUT", local_path=local_url, json_data=params)
 		return res
 
 	def enable_display_tag(self, prep_id, input_id, tag_id):
@@ -157,7 +157,7 @@ class Analysis(BaseAPIClient):
 		pid = self.projects_api.process_project(proj)
 		local_url = '/api/projects/%d/analyses/%d' % (pid, aid)
 		params = {"name": name}
-		res = self.call("PUT", local_path=local_url, json=params, content_type=None)
+		res = self.call("PUT", local_path=local_url, json_data=params, content_type=None)
 		return res
 
 

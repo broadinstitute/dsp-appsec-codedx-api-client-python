@@ -171,7 +171,7 @@ class Projects(BaseAPIClient):
 			params['parentId'] = parentId
 		if new is not None:
 			params['name'] = new
-		res = self.call("PUT", local_url, json=params, content_type=None)
+		res = self.call("PUT", local_url, json_data=params, content_type=None)
 		if res["status"] == "Success" and new is not None:
 			self.projects[new] = pid
 			del self.projects[old_name]
@@ -193,7 +193,7 @@ class Projects(BaseAPIClient):
 			else:
 				raise Exception("Given role is not an accepted role.")
 		local_url = '/api/projects/%d/user-roles/user/%d' % (pid, uid)
-		res = self.call("PUT", local_url, json=user_roles, content_type=None)
+		res = self.call("PUT", local_url, json_data=user_roles, content_type=None)
 		return res
 
 	def add_user_roles(self, proj, uid, roles):
@@ -265,7 +265,7 @@ class Projects(BaseAPIClient):
 		if limit is not None and self.type_check(limit, int, "Limit") : params['limit'] = limit
 		if (offset or limit) and (offset < 0 or limit < 1):
 			raise Exception("Limit and offset must be a positive integer")
-		res = self.call("POST", url, json=params)
+		res = self.call("POST", url, json_data=params)
 		return res
 
 	def query(self, name=None, metadata=None, parentId=False, offset=None, limit=None):
@@ -311,5 +311,5 @@ class Projects(BaseAPIClient):
 		self.type_check(files, list, "Files ")
 		params = {"files": files}
 		url = '/api/projects/%d/files/mappings' % pid
-		res = self.call("POST", url, json=params)
+		res = self.call("POST", url, json_data=params)
 		return res

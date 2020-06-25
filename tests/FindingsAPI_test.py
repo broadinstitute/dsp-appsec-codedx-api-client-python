@@ -40,8 +40,6 @@ class FindingsAPI_test(unittest.TestCase):
 		result = self.findings_api.get_finding(5, ["triage-time"])
 		with self.assertRaises(Exception):
 			self.findings_api.get_finding(None)
-		with self.assertRaises(Exception):
-			self.findings_api.get_finding(5, None)
 
 	@patch('requests.get')
 	def test_get_finding_description(self, mock_get_finding_description):

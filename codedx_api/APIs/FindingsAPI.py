@@ -90,7 +90,7 @@ class Findings(BaseAPIClient):
 			local_url = local_url + query
 		if query:
 			params = {"query": query}
-			res = self.call("POST", local_path=local_url, json=params)
+			res = self.call("POST", local_path=local_url, json_data=params)
 		else:
 			res = self.call("POST", local_url)
 		return res
@@ -112,7 +112,7 @@ class Findings(BaseAPIClient):
 		if not query: query = {}
 		if query:
 			params = {"query": query}
-			res = self.call("POST", local_path=local_url, json=params)
+			res = self.call("POST", local_path=local_url, json_data=params)
 		else:
 			res = self.call("POST", local_url)
 		return res
@@ -136,7 +136,7 @@ class Findings(BaseAPIClient):
 		if not query: query = {}
 		if query:
 			params = {"query": query}
-			res = self.call("POST", local_path=local_url, json=params)
+			res = self.call("POST", local_path=local_url, json_data=params)
 		else:
 			res = self.call("POST", local_url)
 		return res
@@ -160,7 +160,7 @@ class Findings(BaseAPIClient):
 		if not flow_req: flow_req = {}
 		if flow_req:
 			params = {"flowRequest": flow_req}
-			res = self.call("POST", local_path=local_url, json=params)
+			res = self.call("POST", local_path=local_url, json_data=params)
 		else:
 			res = self.call("POST", local_url)
 		return res

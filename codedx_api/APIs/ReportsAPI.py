@@ -54,7 +54,7 @@ class Reports(BaseAPIClient):
 		params["config"] = config
 		if not filters: filters = {}
 		local_url = '/api/projects/%d/report/%s' % (pid, report_type)
-		res = self.call("POST", local_url, json=params)
+		res = self.call("POST", local_url, json_data=params)
 		return res
 
 	def generate_pdf(self, proj, summary_mode="simple", details_mode="with-source", include_result_details=False, include_comments=False, include_request_response=False, filters=None):

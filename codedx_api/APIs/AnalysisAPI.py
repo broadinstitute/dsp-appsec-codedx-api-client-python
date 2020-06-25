@@ -88,7 +88,7 @@ class Analysis(BaseAPIClient):
 		json_data = {'file_name': file_name, 'file_path': file_name, 'file_type': accepted_file_types[file_ext]}
 		if client_request_id is not None and self.type_check(client_request_id, str, "Client_request_id"):
 			json_data['X-Client-Request-Id'] = client_request_id
-		res = self.call(method="UPLOAD", local_path=local_url, json=json_data)
+		res = self.call(method="UPLOAD", local_path=local_url, json_data=json_data)
 		return res
 
 	def get_input_metadata(self, prep_id, input_id):
@@ -167,7 +167,7 @@ class Analysis(BaseAPIClient):
 		self.type_check(enabled, bool, "Enable/disable boolean")
 		local_url = '/api/analysis-prep/%s/%s/tag/%s' % (prep_id, input_id, tag_id)
 		params = {"enabled": enabled}
-		res = self.call("PUT", local_path=local_url, json=params)
+		res = self.call("PUT", local_path=local_url, json_data=params)
 		return res
 
 	def enable_display_tag(self, prep_id, input_id, tag_id):
@@ -268,7 +268,7 @@ class Analysis(BaseAPIClient):
 		pid = self.projects_api.process_project(proj)
 		local_url = '/api/projects/%d/analyses/%d' % (pid, aid)
 		params = {"name": name}
-		res = self.call("PUT", local_path=local_url, json=params, content_type=None)
+		res = self.call("PUT", local_path=local_url, json_data=params, content_type=None)
 		return res
 
 

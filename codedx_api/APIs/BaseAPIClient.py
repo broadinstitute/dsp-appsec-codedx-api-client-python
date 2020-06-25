@@ -3,7 +3,7 @@ import requests
 class BaseAPIClient(object):
 
 	def __init__(self, base, api_key, verbose = False):
-		"""Base API Client for requests"""
+		"""Base API Client for requests."""
 		self.verbose = verbose
 		self.base_path = base
 		self.api_key = api_key

@@ -19,8 +19,8 @@ report_columns = [
 
 class CodeDx(ProjectsAPI.Projects, ReportsAPI.Reports, JobsAPI.Jobs, AnalysisAPI.Analysis, ActionsAPI.Actions):
 	def __init__(self, base, api_key, verbose=False):
-		""" Create a codedx APIclient
-		
+		"""Create a codedx APIclient
+
 			Args:
 				base: base url from codedx instance
 				api_key: api_key for codedx
@@ -29,7 +29,7 @@ class CodeDx(ProjectsAPI.Projects, ReportsAPI.Reports, JobsAPI.Jobs, AnalysisAPI
 		super().__init__(base, api_key, verbose)
 
 	def download_report(self, data, file_name):
-		""" Saves the report in a file."""
+		"""Saves the report in a file."""
 		self.type_check(file_name, str, "Filename")
 		with open(file_name, 'wb') as f:
 			f.write(data)
@@ -59,7 +59,7 @@ class CodeDx(ProjectsAPI.Projects, ReportsAPI.Reports, JobsAPI.Jobs, AnalysisAPI
 		return res
 
 	def get_csv(self, proj, cols=None, file_name='report.csv'):
-		""" Download a project report in CSV format."""
+		"""Download a project report in CSV format."""
 		if not cols: cols = report_columns
 		job = self.generate_csv(proj, cols)
 		res = self.get_report(job, 'text/csv', file_name, "Waiting for report generation...")
@@ -85,7 +85,7 @@ class CodeDx(ProjectsAPI.Projects, ReportsAPI.Reports, JobsAPI.Jobs, AnalysisAPI
 		pass
 
 	def analyze(self, proj, file_name):
-		"""Upload a vulnerability scan and run an analysis"""
+		"""Upload a vulnerability scan and run an analysis."""
 		print("Creating analysis...")
 		prep = self.create_analysis(proj)
 		prep_id = prep["prepId"]
