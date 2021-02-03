@@ -60,8 +60,10 @@ class CodeDx(ProjectsAPI.Projects, ReportsAPI.Reports, JobsAPI.Jobs, AnalysisAPI
 		return res
 
 	def get_xml(self, proj, include_standards=False, include_source=False, include_rule_descriptions=True, file_name='report.xml'):
-		""" Allows user to queue a job to generate an xml report.
+		""" 
+			Get an XML report from CodeDx
 
+			Allows user to queue a job to generate an xml report and download the report.
 			Args:
 				include_standards <Boolean>: List standards violations. Default is fault.
 				include_source <Boolean>: Include source code snippets. Default is false.
@@ -108,3 +110,9 @@ class CodeDx(ProjectsAPI.Projects, ReportsAPI.Reports, JobsAPI.Jobs, AnalysisAPI
 		self.wait_for_job(job, "Waiting for statuses to update...")
 		msg = "Bulk status update (%s) for project %s" % (status, proj)
 		print(msg)
+
+	def insecure_code(self):
+		try:
+			print("hello")
+		except:
+			pass
