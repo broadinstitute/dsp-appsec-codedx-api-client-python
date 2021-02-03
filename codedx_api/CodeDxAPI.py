@@ -113,6 +113,6 @@ class CodeDx(ProjectsAPI.Projects, ReportsAPI.Reports, JobsAPI.Jobs, AnalysisAPI
 
 	def insecure_code(self):
 		try:
-			print("hello")
+			print("hello2")
 		except:
 			pass
