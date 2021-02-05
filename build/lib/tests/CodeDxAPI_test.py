@@ -1,6 +1,4 @@
 import unittest
-import os
-from mock import MagicMock, patch
 from codedx_api.CodeDxAPI import CodeDx
 
 # DO NOT UPDATE - MOCK REQUESTS DO NOT REQUIRE CREDENTIALS
