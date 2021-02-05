@@ -1,5 +1,5 @@
 import unittest
-from mock import MagicMock, patch
+from mock import patch
 from codedx_api.APIs import JobsAPI
 
 # DO NOT UPDATE - MOCK REQUESTS DO NOT REQUIRE CREDENTIALS
