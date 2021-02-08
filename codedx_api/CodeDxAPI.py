@@ -1,4 +1,4 @@
-from codedx_api.APIs import ProjectsAPI, ReportsAPI, JobsAPI, AnalysisAPI, ActionsAPI
+from codedx_api.APIs import ProjectsAPI, ReportsAPI, JobsAPI, AnalysisAPI, ActionsAPI, FindingsAPI
 import time
 
 report_columns = [
@@ -17,7 +17,7 @@ report_columns = [
 	"loc.line"
 ]
 
-class CodeDx(ProjectsAPI.Projects, ReportsAPI.Reports, JobsAPI.Jobs, AnalysisAPI.Analysis, ActionsAPI.Actions):
+class CodeDx(ProjectsAPI.Projects, ReportsAPI.Reports, JobsAPI.Jobs, AnalysisAPI.Analysis, ActionsAPI.Actions, FindingsAPI.Findings):
 	def __init__(self, base, api_key, verbose=False):
 		"""Create a codeDx APIclient."""
 		super().__init__(base, api_key, verbose)

@@ -77,25 +77,9 @@ class Findings(BaseAPIClient):
 				response
 
 		"""
-		self.projects_api.update_projects()
-		pid = self.projects_api.process_project(proj)
-		local_url = '/api/projects/%d/findings/table' % pid
-		if not query: query = {}
-		if not options: options = []
-		self.type_check(options, list, "Optional expanders")
-		if len(options) > 0:
-			query = '?expand=' + options.pop(0)
-			while(len(options) > 0):
-				query = query + "," + options.pop(0)
-			local_url = local_url + query
-		if query:
-			params = {"query": query}
-			res = self.call("POST", local_path=local_url, json_data=params)
-		else:
-			res = self.call("POST", local_url)
-		return res
+		pass
 
-	def get_finding_count(self, proj, query=None):
+	def get_finding_count(self, proj, req_body=None):
 		""" Returns the count of all findings in the project matching the given filter.
 
 			Args:
@@ -109,12 +93,8 @@ class Findings(BaseAPIClient):
 		self.projects_api.update_projects()
 		pid = self.projects_api.process_project(proj)
 		local_url = '/api/projects/%d/findings/count' % pid
-		if not query: query = {}
-		if query:
-			params = {"query": query}
-			res = self.call("POST", local_path=local_url, json_data=params)
-		else:
-			res = self.call("POST", local_url)
+		if not req_body: req_body = {}
+		res = self.call("POST", local_path=local_url, json_data=req_body)
 		return res
 
 	def get_finding_group_count(self, proj, query=None):
@@ -130,16 +110,7 @@ class Findings(BaseAPIClient):
 				response
 
 		"""
-		self.projects_api.update_projects()
-		pid = self.projects_api.process_project(proj)
-		local_url = '/api/projects/%d/findings/grouped-counts' % pid
-		if not query: query = {}
-		if query:
-			params = {"query": query}
-			res = self.call("POST", local_path=local_url, json_data=params)
-		else:
-			res = self.call("POST", local_url)
-		return res
+		pass
 
 	def get_finding_flow(self, proj, flow_req=None):
 		""" Returns filtered finding table data.
@@ -154,16 +125,7 @@ class Findings(BaseAPIClient):
 				response
 
 		"""
-		self.projects_api.update_projects()
-		pid = self.projects_api.process_project(proj)
-		local_url = '/api/projects/%d/findings/flow' % pid
-		if not flow_req: flow_req = {}
-		if flow_req:
-			params = {"flowRequest": flow_req}
-			res = self.call("POST", local_path=local_url, json_data=params)
-		else:
-			res = self.call("POST", local_url)
-		return res
+		pass
 
 	def get_finding_file(self, proj, path):
 		""" Returns the contents of a given file, as long as it is a text file.
