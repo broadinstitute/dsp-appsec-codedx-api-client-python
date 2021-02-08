@@ -62,7 +62,7 @@ class Analysis(BaseAPIClient):
 		json = {'file_name': file_name, 'file_path': file_name, 'file_type': accepted_file_types[file_ext]}
 		if client_request_id is not None and self.type_check(client_request_id, str, "Client_request_id"):
 			json['X-Client-Request-Id'] = client_request_id
-		res = self.call(method="UPLOAD", local_path=local_url, json=json)
+		res = self.call(method="UPLOAD", local_path=local_url, json_data=json)
 		return res
 
 	def get_input_metadata(self, prep_id, input_id):
