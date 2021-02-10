@@ -22,14 +22,11 @@ class Findings(BaseAPIClient):
 
 		"""
 		self.type_check(fid, int, "Findings ID")
-		local_url = '/api/findings/%d' % fid
-		if not options: options = []
-		self.type_check(options, list, "Optional expanders")
-		if len(options) > 0:
-			query = '?expand=' + options.pop(0)
-			while(len(options) > 0):
-				query = query + "," + options.pop(0)
-			local_url = local_url + query
+		local_url = f"/api/findings/{ fid }"
+		if options:
+			self.type_check(options, list, "Optional expanders")
+			query = "?expand=" + ",".join(options)
+			local_url += query
 		res = self.call("GET", local_url)
 		return res
 
@@ -44,7 +41,7 @@ class Findings(BaseAPIClient):
 
 		"""
 		self.type_check(fid, int, "Findings ID")
-		local_url = '/api/findings/%d/description' % fid
+		local_url = f"/api/findings/{ fid }/description"
 		res = self.call("GET", local_url)
 		return res
 
@@ -59,11 +56,11 @@ class Findings(BaseAPIClient):
 
 		"""
 		self.type_check(fid, int, "Findings ID")
-		local_url = '/api/findings/%d/history' % fid
+		local_url = f"/api/findings/{ fid }/history"
 		res = self.call("GET", local_url)
 		return res
 
-	def get_finding_table(self, proj, options=None, query=None):
+	def get_finding_table(self, proj, options=None, req_body=None):
 		""" Returns filtered finding table data.
 
 			This endpoint is a candidate to become a more generic querying API; presently it just returns the data required for the findings table as it exists today.
@@ -77,7 +74,17 @@ class Findings(BaseAPIClient):
 				response
 
 		"""
-		pass
+		self.projects_api.update_projects()
+		pid = self.projects_api.process_project(proj)
+		local_url = f"/api/projects/{ pid }/findings/table"
+		if options:
+			self.type_check(options, list, "Optional expanders")
+			query = "?expand=" + ",".join(options)
+			local_url += query
+		if not req_body: req_body = {}
+		res = self.call("POST", local_path=local_url, json_data=req_body)
+		return res
+		
 
 	def get_finding_count(self, proj, req_body=None):
 		""" Returns the count of all findings in the project matching the given filter.
@@ -92,12 +99,12 @@ class Findings(BaseAPIClient):
 		"""
 		self.projects_api.update_projects()
 		pid = self.projects_api.process_project(proj)
-		local_url = '/api/projects/%d/findings/count' % pid
+		local_url = f"/api/projects/{ pid }/findings/count"
 		if not req_body: req_body = {}
 		res = self.call("POST", local_path=local_url, json_data=req_body)
 		return res
 
-	def get_finding_group_count(self, proj, query=None):
+	def get_finding_group_count(self, proj, req_body=None):
 		""" Returns filtered finding table data.
 
 			This endpoint is a candidate to become a more generic querying API; presently it just returns the data required for the findings table as it exists today.
@@ -110,9 +117,14 @@ class Findings(BaseAPIClient):
 				response
 
 		"""
-		pass
+		self.projects_api.update_projects()
+		pid = self.projects_api.process_project(proj)
+		local_url = f"/api/projects/{ pid }/findings/grouped-counts"
+		if not req_body: req_body = {}
+		res = self.call("POST", local_path=local_url, json_data=req_body)
+		return res
 
-	def get_finding_flow(self, proj, flow_req=None):
+	def get_finding_flow(self, proj, req_body=None):
 		""" Returns filtered finding table data.
 
 			This endpoint is a candidate to become a more generic querying API; presently it just returns the data required for the findings table as it exists today.
@@ -125,7 +137,12 @@ class Findings(BaseAPIClient):
 				response
 
 		"""
-		pass
+		self.projects_api.update_projects()
+		pid = self.projects_api.process_project(proj)
+		local_url = f"/api/projects/{ pid }/findings/flow"
+		if not req_body: req_body = {}
+		res = self.call("POST", local_path=local_url, json_data=req_body)
+		return res
 
 	def get_finding_file(self, proj, path):
 		""" Returns the contents of a given file, as long as it is a text file.
@@ -141,9 +158,9 @@ class Findings(BaseAPIClient):
 		self.projects_api.update_projects()
 		pid = self.projects_api.process_project(proj)
 		if isinstance(path, str):
-			local_url = '/api/projects/%d/files/%s' % (pid, path)
+			local_url = f"/api/projects/{ pid }/files/tree/{ path }"
 		elif isinstance(path, int):
-			local_url = '/api/projects/%d/files/%d' % (pid, path)
+			local_url = f"/api/projects/{ pid }/files/{ path }"
 		else:
 			raise Exception("File path must be either string or int.")
 		res = self.call("GET", local_url)
