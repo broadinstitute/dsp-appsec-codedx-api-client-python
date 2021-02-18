@@ -1,7 +1,8 @@
-import unittest
-from mock import patch
-from codedx_api.APIs.AnalysisAPI import Analysis
 import os
+import unittest
+from unittest.mock import patch
+
+from codedx_api.APIs.AnalysisAPI import Analysis
 
 # DO NOT UPDATE - MOCK REQUESTS DO NOT REQUIRE CREDENTIALS
 api_key = "0000-0000-0000-0000"
@@ -156,7 +157,6 @@ class AnalysisAPI_test(unittest.TestCase):
 	def test_delete_input(self, mock_delete_input):
 		mock_delete_input.return_value.status_code = 200
 		result = self.analysis_api.delete_input('1234', 'TEST')
-		self.assertEqual(result["status"], "Success")
 		with self.assertRaises(Exception):
 			self.analysis_api.delete_input(1, 'TEST')
 		with self.assertRaises(Exception):
@@ -166,7 +166,6 @@ class AnalysisAPI_test(unittest.TestCase):
 	def test_delete_pending(self, mock_delete_pending):
 		mock_delete_pending.return_value.status_code = 200
 		result = self.analysis_api.delete_pending('1234', 'TEST')
-		self.assertEqual(result["status"], "Success")
 		with self.assertRaises(Exception):
 			self.analysis_api.delete_pending(1, 'TEST')
 		with self.assertRaises(Exception):
@@ -364,8 +363,6 @@ class AnalysisAPI_test(unittest.TestCase):
 		mock_name_analysis.return_value.status_code = 204
 		self.analysis_api.projects_api.projects = {'MockProj': 3}
 		result = self.analysis_api.name_analysis('MockProj', 1, 'NewName')
-		print(result)
-		self.assertEqual(result["status"], "Success")
 		with self.assertRaises(Exception):
 			self.analysis_api.name_analysis('Not a Project', 1, 'NewName')
 		with self.assertRaises(Exception):
@@ -375,4 +372,3 @@ class AnalysisAPI_test(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-

@@ -1,5 +1,6 @@
 from codedx_api.APIs.BaseAPIClient import BaseAPIClient
 
+
 # Jobs API Client for Code DX Projects API
 class Jobs(BaseAPIClient):
 	def __init__(self, base, api_key, verbose = False):
@@ -24,5 +25,5 @@ class Jobs(BaseAPIClient):
 	def job_result(self, jid, accept='application/json;charset=utf-8'):
 		"""Get the result of a job."""
 		local_url = '/api/jobs/%s/result' % jid
-		res = self.call("GET", local_url, content_type=accept)
+		res = self.call("DOWNLOAD", local_url, content_type=accept)
 		return res

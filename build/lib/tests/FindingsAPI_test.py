@@ -1,5 +1,6 @@
 import unittest
-from mock import patch
+from unittest.mock import patch
+
 from codedx_api.APIs.FindingsAPI import Findings
 
 # DO NOT UPDATE - MOCK REQUESTS DO NOT REQUIRE CREDENTIALS
@@ -23,6 +24,7 @@ class FindingsAPI_test(unittest.TestCase):
 					}
 				]
 			}
+		self.request_filters = {"sort": {"by": "id", "direction": "ascending"}}
 
 	@patch('requests.get')
 	def test_get_finding(self, mock_get_finding):
@@ -113,15 +115,14 @@ class FindingsAPI_test(unittest.TestCase):
 		mock_get_finding_table.return_value.status_code = 200
 		mock_get_finding_table.return_value.headers= {"Content-Type": 'application/json;charset=utf-8'}
 		result = self.findings_api.get_finding_table('MockProj')
-		print(result)
 		self.assertTrue(isinstance(result, list))
 		self.assertEqual(result[0]["detectionMethod"]["id"], 0)
 		result = self.findings_api.get_finding_table('MockProj', ['description'])
-		result = self.findings_api.get_finding_table(proj='MockProj', req_body={"sort": {"by": "id", "direction": "ascending"}})
-		result = self.findings_api.get_finding_table(proj='MockProj', options=["issue"], req_body={"sort": {"by": "id", "direction": "ascending"}})
+		result = self.findings_api.get_finding_table(proj='MockProj', req_body=self.request_filters)
+		result = self.findings_api.get_finding_table(proj='MockProj', options=["issue"], req_body=self.request_filters)
 		with self.assertRaises(Exception):
 			self.findings_api.get_finding_table(5)
-'''
+
 	@patch('requests.get')
 	@patch('requests.post')
 	def test_get_finding_count(self, mock_get_finding_count, mock_projects):
@@ -135,7 +136,7 @@ class FindingsAPI_test(unittest.TestCase):
 		mock_get_finding_count.return_value.headers= {"Content-Type": 'application/json;charset=utf-8'}
 		result = self.findings_api.get_finding_count(self.mprojs["projects"][0]["id"])
 		self.assertTrue("count" in result)
-		result = self.findings_api.get_finding_count(proj=self.mprojs["projects"][0]["id"], query={"sort": {"by": "id", "direction": "ascending"}})
+		result = self.findings_api.get_finding_count(proj=self.mprojs["projects"][0]["id"], req_body=self.request_filters)
 		with self.assertRaises(Exception):
 			self.findings_api.get_finding_count(-1)
 
@@ -161,7 +162,7 @@ class FindingsAPI_test(unittest.TestCase):
 		mock_get_finding_group_count.return_value.headers= {"Content-Type": 'application/json;charset=utf-8'}
 		result = self.findings_api.get_finding_group_count(self.mprojs["projects"][0]["id"])
 		self.assertTrue("count" in result[0])
-		result = self.findings_api.get_finding_group_count(self.mprojs["projects"][0]["id"], {"sort": {"by": "id", "direction": "ascending"}})
+		result = self.findings_api.get_finding_group_count(self.mprojs["projects"][0]["id"], self.request_filters)
 		with self.assertRaises(Exception):
 			self.findings_api.get_finding_group_count(5)
 
@@ -211,6 +212,6 @@ class FindingsAPI_test(unittest.TestCase):
 			self.findings_api.get_finding_file(1, [])
 		with self.assertRaises(Exception):
 			self.findings_api.get_finding_file(-5, 5)
-'''
+
 if __name__ == '__main__':
     unittest.main()

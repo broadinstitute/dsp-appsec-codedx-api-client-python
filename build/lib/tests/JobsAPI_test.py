@@ -1,5 +1,6 @@
 import unittest
-from mock import patch
+from unittest.mock import patch
+
 from codedx_api.APIs import JobsAPI
 
 # DO NOT UPDATE - MOCK REQUESTS DO NOT REQUIRE CREDENTIALS
