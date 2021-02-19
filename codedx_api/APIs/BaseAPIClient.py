@@ -8,27 +8,23 @@ from requests.exceptions import ContentDecodingError
 
 class BaseAPIClient(object):
 
-	def __init__(self, base, api_key, verbose = False):
-		"""Base API Client for requests."""
-		self.verbose = verbose
-		self.base_path = base
+	def __init__(self, base: str, api_key: str):
+		"""Constructor for the base CodeDx API client
+
+		Args:
+			host (str): The CodeDx base url. Must be in the correct format: https://[CODEDX-HOST]/codedx
+			api_key (str): An API key from CodeDx.
+		"""	
+		self.base_url = base
 		self.api_key = api_key
 		self.headers = {
 			'API-Key': self.api_key,
 			'accept': 'application/json',
 			'Content-Type': 'application/json'
 		}
-		self.commands = {
-			"GET": self._get,
-			"POST": self._post,
-			"PUT": self._put,
-			"DELETE": self._delete,
-			"UPLOAD": self._upload,
-			"DOWNLOAD": self._download
-		}
 
-	def _compose_url(self,local_path):
-		return self.base_path + local_path
+	def _compose_url(self,path: str):
+		return self.base_url + path
 
 	def _compose_headers(self,local_headers):
 		headers = self.headers
@@ -45,22 +41,38 @@ class BaseAPIClient(object):
 			raise Exception(msg)
 		return True
 
-	@staticmethod
-	def _get(url, headers, json_data, content_type):
-		res = JSONResponseHandler(requests.get(url, headers=headers))
-		return res.get_data()
+	def get(self, path, json_data=None, content_type='application/json;charset=utf-8', local_headers=None):
+		""" Composes a get request to CodeDx
 
-	@staticmethod
-	def _download(url, headers, json_data, content_type):
-		res = ContentResponseHandler(requests.get(url, headers=headers), content_type)
-		return res.get_data()
+		Args:
+			path ([type]): [description]
+			json_data ([type], optional): [description]. Defaults to None.
+			content_type (str, optional): [description]. Defaults to 'application/json;charset=utf-8'.
+			local_headers ([type], optional): [description]. Defaults to None.
 
-	@staticmethod
-	def _post(url, headers, json_data, content_type):
-		res = JSONResponseHandler(requests.post(url, headers=headers, json=json_data))
-		return res.get_data()
+		Returns:
+			[type]: [description]
+		"""
+		url = self._compose_url(path)
+		headers = self._compose_headers(local_headers)
+		res = requests.get(url, headers=headers)
+		return res
 
-	def _upload(self, url, headers, json_data, content_type):
+	def download(self, path, json_data=None, content_type='application/json;charset=utf-8', local_headers=None):
+		url = self._compose_url(path)
+		headers = self._compose_headers(local_headers)
+		res = requests.get(url, headers=headers)
+		return res
+
+	def post(self, path, json_data=None, content_type='application/json;charset=utf-8', local_headers=None):
+		url = self._compose_url(path)
+		headers = self._compose_headers(local_headers)
+		res = requests.post(url, headers=headers, json=json_data)
+		return res
+
+	def upload(self, path, json_data, content_type='application/json;charset=utf-8', local_headers=None):
+		url = self._compose_url(path)
+		headers = self._compose_headers(local_headers)
 		if 'file_name' not in json_data or 'file_path' not in json_data or 'file_type' not in json_data:
 			raise Exception("Missing file data.")
 		headers = {'API-Key': self.api_key, 
@@ -71,24 +83,22 @@ class BaseAPIClient(object):
 		files = {
 			'file': (json_data['file_name'], f, json_data['file_type'])
 		}
-		res = JSONResponseHandler(requests.post(url, headers=headers, files=files))
+		res = requests.post(url, headers=headers, files=files)
 		f.close()
-		return res.get_data()
+		return res
 
-	@staticmethod
-	def _put(url, headers, json_data, content_type):
-		res = ResponseHandler(requests.put(url,headers=headers,json=json_data))
-		return res.get_data()
-
-	@staticmethod
-	def _delete(url, headers, json_data, content_type):
-		res = ResponseHandler(requests.delete(url, headers=headers))
-		return res.get_data()
-
-	def call(self, method, local_path, json_data=None, content_type='application/json;charset=utf-8', local_headers=None):
-		url = self._compose_url(local_path)
+	def put(self, path, json_data, content_type='application/json;charset=utf-8', local_headers=None):
+		url = self._compose_url(path)
 		headers = self._compose_headers(local_headers)
-		return self.commands[method](url, headers, json_data, content_type)
+		res = requests.put(url,headers=headers,json=json_data)
+		return res
+
+	def delete(self, path, json_data=None, content_type='application/json;charset=utf-8', local_headers=None):
+		url = self._compose_url(path)
+		headers = self._compose_headers(local_headers)
+		res = requests.delete(url, headers=headers)
+		return res
+
 
 class ContentType(str, Enum):
     """Enumerates accepted content types"""
@@ -132,7 +142,7 @@ class JSONResponseHandler(ResponseHandler):
 
 
 class ContentResponseHandler(ResponseHandler):
-	def __init__(self, response, content):
+	def __init__(self, response: Response, content: ContentType):
 		"""Initialize Content Response Handler"""
 		self.response = response
 		self.content = content

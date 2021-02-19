@@ -1,10 +1,11 @@
-from codedx_api.APIs.BaseAPIClient import BaseAPIClient
+from codedx_api.APIs.BaseAPIClient import BaseAPIClient, JSONResponseHandler
 from codedx_api.APIs.ProjectsAPI import Projects
 
+
 class Findings(BaseAPIClient):
-	def __init__(self, base, api_key, verbose = False):
+	def __init__(self, base, api_key):
 		"""Iniitilize"""
-		super().__init__(base, api_key, verbose)
+		super().__init__(base, api_key)
 		self.projects_api = Projects(base, api_key)
 
 	def get_finding(self, fid, options=None):
@@ -27,8 +28,8 @@ class Findings(BaseAPIClient):
 			self.type_check(options, list, "Optional expanders")
 			query = "?expand=" + ",".join(options)
 			local_url += query
-		res = self.call("GET", local_url)
-		return res
+		data = JSONResponseHandler(self.get(local_url)).get_data()
+		return data
 
 	def get_finding_description(self, fid):
 		""" Returns the descriptions for the given finding from all available sources.
@@ -42,8 +43,8 @@ class Findings(BaseAPIClient):
 		"""
 		self.type_check(fid, int, "Findings ID")
 		local_url = f"/api/findings/{ fid }/description"
-		res = self.call("GET", local_url)
-		return res
+		data = JSONResponseHandler(self.get(local_url)).get_data()
+		return data
 
 	def get_finding_history(self, fid):
 		""" Responds with an array of “activity event” objects in JSON.
@@ -57,8 +58,8 @@ class Findings(BaseAPIClient):
 		"""
 		self.type_check(fid, int, "Findings ID")
 		local_url = f"/api/findings/{ fid }/history"
-		res = self.call("GET", local_url)
-		return res
+		data = JSONResponseHandler(self.get(local_url)).get_data()
+		return data
 
 	def get_finding_table(self, proj, options=None, req_body=None):
 		""" Returns filtered finding table data.
@@ -82,8 +83,8 @@ class Findings(BaseAPIClient):
 			query = "?expand=" + ",".join(options)
 			local_url += query
 		if not req_body: req_body = {}
-		res = self.call("POST", local_path=local_url, json_data=req_body)
-		return res
+		data = JSONResponseHandler(self.post(local_url, json_data=req_body)).get_data()
+		return data
 		
 
 	def get_finding_count(self, proj, req_body=None):
@@ -101,8 +102,8 @@ class Findings(BaseAPIClient):
 		pid = self.projects_api.process_project(proj)
 		local_url = f"/api/projects/{ pid }/findings/count"
 		if not req_body: req_body = {}
-		res = self.call("POST", local_path=local_url, json_data=req_body)
-		return res
+		data = JSONResponseHandler(self.post(local_url, json_data=req_body)).get_data()
+		return data
 
 	def get_finding_group_count(self, proj, req_body=None):
 		""" Returns filtered finding table data.
@@ -121,8 +122,8 @@ class Findings(BaseAPIClient):
 		pid = self.projects_api.process_project(proj)
 		local_url = f"/api/projects/{ pid }/findings/grouped-counts"
 		if not req_body: req_body = {}
-		res = self.call("POST", local_path=local_url, json_data=req_body)
-		return res
+		data = JSONResponseHandler(self.post(local_url, json_data=req_body)).get_data()
+		return data
 
 	def get_finding_flow(self, proj, req_body=None):
 		""" Returns filtered finding table data.
@@ -141,8 +142,8 @@ class Findings(BaseAPIClient):
 		pid = self.projects_api.process_project(proj)
 		local_url = f"/api/projects/{ pid }/findings/flow"
 		if not req_body: req_body = {}
-		res = self.call("POST", local_path=local_url, json_data=req_body)
-		return res
+		data = JSONResponseHandler(self.post(local_url, json_data=req_body)).get_data()
+		return data
 
 	def get_finding_file(self, proj, path):
 		""" Returns the contents of a given file, as long as it is a text file.
@@ -163,5 +164,5 @@ class Findings(BaseAPIClient):
 			local_url = f"/api/projects/{ pid }/files/{ path }"
 		else:
 			raise Exception("File path must be either string or int.")
-		res = self.call("GET", local_url)
-		return res
+		data = JSONResponseHandler(self.get(local_url)).get_data()
+		return data

@@ -1,9 +1,12 @@
-from codedx_api.APIs.BaseAPIClient import BaseAPIClient
 import re
+
+from codedx_api.APIs.BaseAPIClient import (BaseAPIClient, JSONResponseHandler,
+                                           ResponseHandler)
+
 
 # Projects Client for Code DX Projects API
 class Projects(BaseAPIClient):
-	def __init__(self, base, api_key, verbose = False):
+	def __init__(self, base, api_key):
 		""" Creates an API Client for Code DX Projects API
 
 			Args:
@@ -15,7 +18,7 @@ class Projects(BaseAPIClient):
 				response
 
 		"""
-		super().__init__(base, api_key, verbose)
+		super().__init__(base, api_key)
 		self.roles = ['Reader', 'Updater', 'Creator', 'Manager']
 		self.projects = {}
 
@@ -29,8 +32,8 @@ class Projects(BaseAPIClient):
 				Dict[name] = id
 		"""
 		local_url = '/api/projects'
-		res = self.call("GET", local_url)
-		return res
+		data = JSONResponseHandler(self.get(local_url)).get_data()
+		return data
 
 	def update_projects(self):
 		res = self.get_projects()
@@ -89,8 +92,8 @@ class Projects(BaseAPIClient):
 		"""
 		pid = self.process_project(proj)
 		local_url = '/api/projects/%d/statuses' % pid
-		res = self.call("GET", local_url)
-		return res
+		data = JSONResponseHandler(self.get(local_url)).get_data()
+		return data
 
 	def project_files(self, proj):
 		""" Provides a list of files for a project.
@@ -100,8 +103,8 @@ class Projects(BaseAPIClient):
 		"""
 		pid = self.process_project(proj)
 		local_url = '/api/projects/%d/files' % pid
-		res = self.call("GET", local_url)
-		return res
+		data = JSONResponseHandler(self.get(local_url)).get_data()
+		return data
 
 	def project_roles(self, proj):
 		""" Provides a list of all User roles.
@@ -111,8 +114,8 @@ class Projects(BaseAPIClient):
 		"""
 		pid = self.process_project(proj)
 		local_url = '/api/projects/%d/user-roles' % pid
-		res = self.call("GET", local_url)
-		return res
+		data = JSONResponseHandler(self.get(local_url)).get_data()
+		return data
 
 	def project_user(self, proj, uid):
 		""" Provides a User Role for a given user.
@@ -122,8 +125,8 @@ class Projects(BaseAPIClient):
 		"""
 		pid = self.process_project(proj)
 		local_url = '/api/projects/%d/user-roles/user/%d' % (pid, uid)
-		res = self.call("GET", local_url)
-		return res
+		data = JSONResponseHandler(self.get(local_url)).get_data()
+		return data
 
 	def create_project(self, name):
 		""" Creates a project.
@@ -137,9 +140,9 @@ class Projects(BaseAPIClient):
 			raise Exception("Did not input a valid name.")
 		local_url = '/api/projects'
 		params = {"name": name}
-		res = self.call("PUT", local_url, params)
-		self.projects[res['name']] = res['id']
-		return res
+		data = JSONResponseHandler(self.put(local_url, params)).get_data()
+		self.projects[data['name']] = data['id']
+		return data
 
 	def delete_project(self, proj):
 		""" Deletes a project.
@@ -149,11 +152,8 @@ class Projects(BaseAPIClient):
 		"""
 		pid = self.process_project(proj)
 		local_url = '/api/projects/%d' % pid
-		res = self.call("DELETE", local_url)
-		if res["status"] == "Success":
-			name = self.get_name(pid)
-			del self.projects[name]
-		return res
+		ResponseHandler(self.delete(local_url)).validate()
+		return
 
 	def update_project(self, proj, new = None, parentId = None):
 		""" Update a project by changing its name or parent.
@@ -171,11 +171,8 @@ class Projects(BaseAPIClient):
 			params['parentId'] = parentId
 		if new is not None:
 			params['name'] = new
-		res = self.call("PUT", local_url, json_data=params, content_type=None)
-		if res["status"] == "Success" and new is not None:
-			self.projects[new] = pid
-			del self.projects[old_name]
-		return res
+		ResponseHandler(self.put(local_url, json_data=params)).validate()
+		return
 
 	# might want to move into codedx wrapper....
 	def update_user_roles(self, proj, uid, roles, add):
@@ -193,8 +190,8 @@ class Projects(BaseAPIClient):
 			else:
 				raise Exception("Given role is not an accepted role.")
 		local_url = '/api/projects/%d/user-roles/user/%d' % (pid, uid)
-		res = self.call("PUT", local_url, json_data=user_roles, content_type=None)
-		return res
+		ResponseHandler(self.put(local_url, json_data=user_roles)).validate()
+		return
 
 	def add_user_roles(self, proj, uid, roles):
 		""" Update a user by adding roles.
@@ -264,8 +261,8 @@ class Projects(BaseAPIClient):
 		if limit is not None and self.type_check(limit, int, "Limit") : params['limit'] = limit
 		if (offset or limit) and (offset < 0 or limit < 1):
 			raise Exception("Limit and offset must be a positive integer")
-		res = self.call("POST", url, json_data=params)
-		return res
+		data = JSONResponseHandler(self.post(url, json_data=params)).get_data()
+		return data
 
 	def query(self, name=None, metadata=None, parentId=False, offset=None, limit=None):
 		""" Gets a list of projects which match some filter/query criteria, and which you are allowed to view.
@@ -310,5 +307,5 @@ class Projects(BaseAPIClient):
 		self.type_check(files, list, "Files ")
 		params = {"files": files}
 		url = '/api/projects/%d/files/mappings' % pid
-		res = self.call("POST", url, json_data=params)
-		return res
+		data = JSONResponseHandler(self.post(url, json_data=params)).get_data()
+		return data

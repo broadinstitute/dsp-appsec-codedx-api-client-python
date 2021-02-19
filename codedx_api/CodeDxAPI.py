@@ -1,5 +1,7 @@
-from codedx_api.APIs import ProjectsAPI, ReportsAPI, JobsAPI, AnalysisAPI, ActionsAPI, FindingsAPI
 import time
+
+from codedx_api.APIs import (ActionsAPI, AnalysisAPI, FindingsAPI, JobsAPI,
+                             ProjectsAPI, ReportsAPI)
 
 report_columns = [
 	"projectHierarchy",
@@ -18,9 +20,9 @@ report_columns = [
 ]
 
 class CodeDx(ProjectsAPI.Projects, ReportsAPI.Reports, JobsAPI.Jobs, AnalysisAPI.Analysis, ActionsAPI.Actions, FindingsAPI.Findings):
-	def __init__(self, base, api_key, verbose=False):
+	def __init__(self, base, api_key):
 		"""Create a codeDx APIclient."""
-		super().__init__(base, api_key, verbose)
+		super().__init__(base, api_key)
 
 	def download_report(self, data, file_name):
 		"""Saves the report in a file."""

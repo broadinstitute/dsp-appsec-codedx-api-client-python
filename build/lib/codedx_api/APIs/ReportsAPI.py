@@ -1,10 +1,12 @@
-from codedx_api.APIs.BaseAPIClient import BaseAPIClient
-from codedx_api.APIs.ProjectsAPI import Projects
 import re
+
+from codedx_api.APIs.BaseAPIClient import BaseAPIClient, JSONResponseHandler
+from codedx_api.APIs.ProjectsAPI import Projects
+
 
 # Reports Client for Code DX Projects API
 class Reports(BaseAPIClient):
-	def __init__(self, base, api_key, verbose = False):
+	def __init__(self, base, api_key):
 		""" Creates an API Client for Code DX Projects API
 
 			Args:
@@ -13,7 +15,7 @@ class Reports(BaseAPIClient):
 				verbose: Boolean - not supported yet
 
 		"""
-		super().__init__(base, api_key, verbose)
+		super().__init__(base, api_key)
 		self.report_columns = [
 			"projectHierarchy",
 			"id",
@@ -29,7 +31,7 @@ class Reports(BaseAPIClient):
 			"loc.path",
 			"loc.line"
 		]
-		self.projects_api = Projects(base, api_key, verbose)
+		self.projects_api = Projects(base, api_key)
 
 	def report_types(self, proj):
 		""" Provides a list of report types for a project.
@@ -39,8 +41,8 @@ class Reports(BaseAPIClient):
 		"""
 		pid = self.projects_api.process_project(proj)
 		local_url = '/api/projects/%d/report/types' % pid
-		res = self.call("GET", local_url)
-		return res
+		data = JSONResponseData(self.get(local_url)).get_data()
+		return data
 
 	def generate(self, pid, report_type, config, filters=None):
 		""" Allows user to queue a job to generate a report.
@@ -52,9 +54,10 @@ class Reports(BaseAPIClient):
 		params["filter"] = filters
 		params["config"] = config
 		if not filters: filters = {}
-		local_url = '/api/projects/%d/report/%s' % (pid, report_type)
-		res = self.call("POST", local_url, params)
-		return res
+		# TODO: align report type to content tpye
+		path = '/api/projects/%d/report/%s' % (pid, report_type)
+		data = JSONResponseHandler(self.post(path, json_data=params)).get_data()
+		return data
 
 	def generate_pdf(self, proj, summary_mode="simple", details_mode="with-source", include_result_details=False, include_comments=False, include_request_response=False, filters=None):
 		""" Allows user to queue a job to generate a pdf report. Returns jobId and status.
@@ -80,8 +83,8 @@ class Reports(BaseAPIClient):
 		config["includeComments"] = include_comments
 		self.type_check(include_request_response, bool, "include_request_response")
 		config["includeRequestResponse"] = include_request_response
-		res = self.generate(pid, "pdf", config, filters)
-		return res
+		data = self.generate(pid, "pdf", config, filters)
+		return data
 
 	def get_csv_columns(self):
 		""" Returns a list of optional columns for a project csv report."""
@@ -100,8 +103,8 @@ class Reports(BaseAPIClient):
 		for col in cols:
 			if col not in self.report_columns: raise Exception("Invaild column name.")
 		config["columns"] = cols
-		res = self.generate(pid, "csv", config)
-		return res
+		data = self.generate(pid, "csv", config)
+		return data
 
 	def generate_xml(self, proj, include_standards=False, include_source=False, include_rule_descriptions=True):
 		""" Allows user to queue a job to generate an xml report. Returns jobId and status.
@@ -120,8 +123,8 @@ class Reports(BaseAPIClient):
 		config["includeSource"] = include_source
 		self.type_check(include_rule_descriptions, bool, "include_rule_descriptions")
 		config["includeRuleDescriptions"] = include_rule_descriptions
-		res = self.generate(pid, "xml", config)
-		return res
+		data = self.generate(pid, "xml", config)
+		return data
 
 	def generate_nessus(self, proj, default_host=None, operating_system="", mac_address="", netBIOS_name=""):
 		""" Allows user to queue a job to generate a nessus report. Returns jobId and status.
@@ -145,8 +148,8 @@ class Reports(BaseAPIClient):
 		config["macAddress"] = mac_address
 		self.type_check(netBIOS_name, str, "netBIOS_name")
 		config["netBIOSName"] = netBIOS_name
-		res = self.generate(pid, "nessus", config)
-		return res
+		data = self.generate(pid, "nessus", config)
+		return data
 
 	def generate_nbe(self, proj, host_address=None):
 		""" Allows user to queue a job to generate an AlienVault/NBE report. Returns jobId and status.
@@ -161,5 +164,5 @@ class Reports(BaseAPIClient):
 		if re.search(host_address, "^((25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\\.){3}((25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9]))$") is None:
 			raise Exception("Not a valid IPv4 address.")
 		config["hostAddresss"] = host_address
-		res = self.generate(pid, "nbe", config)
-		return res
+		data = self.generate(pid, "nbe", config)
+		return data

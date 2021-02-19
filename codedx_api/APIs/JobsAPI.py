@@ -1,9 +1,11 @@
-from codedx_api.APIs.BaseAPIClient import BaseAPIClient
+from codedx_api.APIs.BaseAPIClient import (BaseAPIClient,
+                                           ContentResponseHandler,
+                                           JSONResponseHandler)
 
 
 # Jobs API Client for Code DX Projects API
 class Jobs(BaseAPIClient):
-	def __init__(self, base, api_key, verbose = False):
+	def __init__(self, base, api_key):
 		""" Creates an API Client for Code DX Jobs API
 
 			Args:
@@ -12,18 +14,18 @@ class Jobs(BaseAPIClient):
 				verbose: Boolean - not supported yet
 
 		"""
-		super().__init__(base, api_key, verbose)
+		super().__init__(base, api_key)
 
 
 	def job_status(self, jid):
 		"""Queries the status of a job."""
 		self.type_check(jid, str, "JobId")
 		local_url = '/api/jobs/%s' % jid
-		res = self.call("GET", local_url)
-		return res
+		data = JSONResponseHandler(self.get(local_url)).get_data()
+		return data
 
-	def job_result(self, jid, accept='application/json;charset=utf-8'):
+	def job_result(self, jid, accept):
 		"""Get the result of a job."""
 		local_url = '/api/jobs/%s/result' % jid
-		res = self.call("DOWNLOAD", local_url, content_type=accept)
-		return res
+		data = ContentResponseHandler(self.download(local_url), accept).get_data()
+		return data

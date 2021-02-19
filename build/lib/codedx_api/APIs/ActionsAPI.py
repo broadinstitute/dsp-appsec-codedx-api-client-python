@@ -1,17 +1,18 @@
-from codedx_api.APIs.BaseAPIClient import BaseAPIClient
+from codedx_api.APIs.BaseAPIClient import BaseAPIClient, JSONResponseHandler
 from codedx_api.APIs.ProjectsAPI import Projects
+
 
 # Actions API Client for Code DX Projects API
 class Actions(BaseAPIClient):
-	def __init__(self, base, api_key, verbose = False):
-		""" Creates an API Client for Code DX Jobs API
+	def __init__(self, base, api_key):
+		""" Creates an API Client for Code DX Actions API
 
 			Args:
 				base: String representing base url from Code DX
 				api_key: String representing API key from Code DX
 				verbose: Boolean - not supported yet
 		"""
-		super().__init__(base, api_key, verbose)
+		super().__init__(base, api_key)
 		self.projects_api = Projects(base, api_key)
 
 	def bulk_status_update(self, proj, status="false-positive", filters=None):
@@ -30,5 +31,5 @@ class Actions(BaseAPIClient):
 			"filter": filters,
 			"status": status
 		}
-		res = self.call("POST", local_url, params)
-		return res
+		data = JSONResponseHandler(self.post(local_url, params)).get_data()
+		return data
