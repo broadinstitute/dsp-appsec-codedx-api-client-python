@@ -1,275 +1,220 @@
 import os
+from typing import List
 
 from codedx_api.APIs.BaseAPIClient import (BaseAPIClient, JSONResponseHandler,
                                            ResponseHandler)
-from codedx_api.APIs.ProjectsAPI import Projects
 
 
 # Jobs API Client for Code DX Projects API
 class Analysis(BaseAPIClient):
-	def __init__(self, base, api_key):
-		""" Creates an API Client for Code DX Jobs API
-
-			Args:
-				base: String representing base url from Code DX
-				api_key: String representing API key from Code DX
-				verbose: Boolean - not supported yet
-			
-			Returns:
-				Analysis API client
-
-		"""
-		super().__init__(base, api_key)
-		self.projects_api = Projects(base, api_key)
-
-	def create_analysis(self, proj):
-		""" Create a new Analysis Prep associated with a particular project.
-
-			If Git is configured on that project, the new Analysis Prep will automatically initialize an input corresponding to that configuration.
-
-			Args:
-				proj: project name or id.
-
-			Output:
-				response
-
-		"""
-		self.projects_api.update_projects()
-		pid = self.projects_api.process_project(proj)
-		local_url = '/api/analysis-prep'
-		params = {"projectId": pid}
-		data = JSONResponseHandler(self.post(local_url, params)).get_data()
-		return data
 
 
-	def get_prep(self, prep_id):
-		""" Get a list of Input IDs and Verification Errors for an Analysis Prep.
-
-			Args:
-				prep_id: Accepts a string as the prep_id
-
-			Output:
-				response
-
-		"""
-		self.type_check(prep_id, str, "Prep_id")
-		local_url = '/api/analysis-prep/%s' % prep_id
-		data = JSONResponseHandler(self.get(local_url)).get_data()
-		return data
-
-	def upload_analysis(self, prep_id, file_name, client_request_id=None):
-		""" Analysis Preps should be populated by uploading files to Code Dx.
-
-			See https://codedx.com/Documentation/UserGuide.html#ImportingScanResults for a list of file upload formats
-
-			Args:
-				prep_id: Accepts a string as a prep id.
-				file_name: File to upload for analysis.
-				client_request_id: can be specified if you need to make modifications to analysis later
-
-			Output:
-				response
-
-		"""
-		self.type_check(prep_id, str, "Prep_id")
-		local_url = '/api/analysis-prep/%s/upload' % prep_id
+	def __get_file_data(self, file_name):
+		file_ext = os.path.splitext(file_name)[1]
 		accepted_file_types = {
 			'.xml': 'text/xml',
 			'.json': 'application/json',
 			'.zip': 'application/zip',
-#			'.ozasmt': '',
 			'.csv': 'text/csv',
-			'.txt': 'text/plain',
-#			'.fpr': '',
-#			'.nessus': '',
-#			'.htm': '',
-#			'.tm7': ''
+			'.txt': 'text/plain'
 		}
-		file_ext = os.path.splitext(file_name)[1]
-		if file_ext not in accepted_file_types:
-			raise Exception("File type was not accepted.")
-		json_data = {'file_name': file_name, 'file_path': file_name, 'file_type': accepted_file_types[file_ext]}
-		if client_request_id is not None and self.type_check(client_request_id, str, "Client_request_id"):
-			json_data['X-Client-Request-Id'] = client_request_id
-		data = JSONResponseHandler(self.upload(local_url, json_data=json_data)).get_data()
+		file_data = {
+			'file_name': file_name,
+			'file_path': file_name,
+			'file_type': accepted_file_types[file_ext]
+		}
+		return file_data
+
+
+	def create_analysis(self, project: int) -> dict:
+		"""Create a new Analysis Prep associated with a particular project.
+
+		Args:
+			project (int): project id
+
+		Returns:
+			dict: new Analysis Prep as JSON
+		"""
+		path = '/api/analysis-prep'
+		params = {"projectId": project}
+		data = JSONResponseHandler(self.post(path, params)).get_data()
 		return data
 
-	def get_input_metadata(self, prep_id, input_id):
-		""" Get metadata for a particular input associated with an Analysis Prep.
 
-			Args:
-				prep_id: Accepts a string as a prep id.
-				input_id: input from upload.
+	def get_prep(self, prep_id: str) -> dict:
+		"""Get lists of Input IDs and Verification Errors for an Analysis Prep.
 
-			Output:
-				response
+		Args:
+			prep_id (str): Analysis Prep id
 
+		Returns:
+			dict: input ids and verification errors
 		"""
-		self.type_check(prep_id, str, "Prep_id")
-		self.type_check(input_id, str, "Input_id")
-		local_url = '/api/analysis-prep/%s/%s' % (prep_id, input_id)
-		data = JSONResponseHandler(self.get(local_url)).get_data()
+		path = f'/api/analysis-prep/{ prep_id }'
+		data = JSONResponseHandler(self.get(path)).get_data()
 		return data
 
-	def delete_input(self, prep_id, input_id):
-		""" Delete input. If the inputId is known (this will be the case most of the time), use the URL that includes an input-id parameter.
 
-			Args:
-				prep_id: Accepts a string as a prep id.
-				input_id: input from upload.
+	def upload_analysis(self, prep_id: str, file_name: str, client_request_id: str = None) -> dict:
+		"""Analysis Preps should be populated by uploading files to Code Dx.
 
-			Output:
-				response
-	
+		This will create a job to determine the contents of the file.
+		Args:
+			prep_id (str): Analysis Prep ID
+			file_name (str): File for analysis
+			client_request_id (str, optional): Arbitrary identifier used to make modifications to analysis later. Defaults to None.
+
+		Returns:
+			dict: Data about the job created
 		"""
-		self.type_check(prep_id, str, "Prep_id")
-		self.type_check(input_id, str, "Input_id")
-		local_url = '/api/analysis-prep/%s/%s' % (prep_id, input_id)
-		ResponseHandler(self.delete(local_url)).validate()
+		path = f'/api/analysis-prep/{ prep_id }/upload'
+		file_data = self.__get_file_data(file_name)
+		if client_request_id:
+			headers['X-Client-Request-Id'] = client_request_id
+		data = JSONResponseHandler(self.upload(path, file_data=file_data)).get_data()
+		return data
+
+
+	def get_input_metadata(self, prep_id: str, input_id: str) -> dict:
+		"""[summary]
+
+		Args:
+			prep_id (str): Prep ID
+			input_id (str): Input ID
+
+		Returns:
+			dict: Input data
+		"""
+		path = f'/api/analysis-prep/{ prep_id }/{ input_id }'
+		data = JSONResponseHandler(self.get(path)).get_data()
+		return data
+
+
+	def delete_input(self, prep_id: str, input_id: str):
+		"""Delete an input
+
+		Args:
+			prep_id (str): Prep ID
+			input_id (str): Input ID
+		"""
+		path = f'/api/analysis-prep/{ prep_id }/{ input_id }'
+		ResponseHandler(self.delete(path)).validate()
 		return
 
 
-	def delete_pending(self, prep_id, request_id):
-		""" Delete pending input. If an input file has just begun to upload, but that request has not completed and returned an inputId, use the “pending” URL.
+	def delete_pending(self, prep_id: str, client_request_id: str):
+		"""Delete input that is still pending and has no input ID yet
 
-			This requires the input upload request to have specified a X-Client-Request-Id header.
-
-			Args:
-				prep_id: Accepts a string as a prep id.
-				request_id: X-Client-Request-Id from upload_analysis.
-
-			Output:
-				response
-	
+		Args:
+			prep_id (str): Prep ID
+			client_request_id (str): X-Client-Request-Id used to upload input
 		"""
-		self.type_check(prep_id, str, "Prep_id")
-		self.type_check(request_id, str, "Request_id")
-		local_url = '/api/analysis-prep/%s/pending' % prep_id
-		headers = {'X-Client-Request-Id': request_id}
-		ResponseHandler(self.delete(local_url, local_headers=headers)).validate()
+		path = '/api/analysis-prep/%s/pending' % prep_id
+		headers = {'X-Client-Request-Id': client_request_id}
+		ResponseHandler(self.delete(path, local_headers=headers)).validate()
 		return
 
-	def toggle_display_tag(self, prep_id, input_id, tag_id, enabled):
-		""" Enable and disable individual display tags on individual prop inputs.
-		
-			Disabled tags will cause a file to be treated as if that tag were not there, for analysis purposes.
 
-			Args:
-				prep_id: Accepts a string as a prep id.
-				input_id: input from upload.
-				tag_id: tag to enable/disable
-				enabled: boolean - enable tag if true
+	def toggle_display_tag(self, prep_id: str, input_id: str, tag_id: str, enabled: bool) -> dict:
+		"""Enable and disable individual display tags on individual prop inputs.
 
-			Output:
-				response
-	
+		Args:
+			prep_id (str): Prep ID
+			input_id (str): Input ID
+			tag_id (str): Tag ID
+			enabled (bool): True to enable, False to disable
+
+		Returns:
+			dict: Input Display Info object as JSON, representing the new state of the input
 		"""
-		self.type_check(prep_id, str, "Prep_id")
-		self.type_check(input_id, str, "Input_id")
-		self.type_check(tag_id, str, "Tag_id")
-		self.type_check(enabled, bool, "Enable/disable boolean")
-		local_url = '/api/analysis-prep/%s/%s/tag/%s' % (prep_id, input_id, tag_id)
+		path = f'/api/analysis-prep/{ prep_id }/{ input_id }/tag/{ tag_id }'
 		params = {"enabled": enabled}
-		data = JSONResponseHandler(self.put(local_url, json_data=params)).get_data()
+		data = JSONResponseHandler(self.put(path, json_data=params)).get_data()
 		return data
 
-	def enable_display_tag(self, prep_id, input_id, tag_id):
-		""" Enable individual display tags on individual prop inputs.
 
-			Args:
-				prep_id: Accepts a string as a prep id.
-				input_id: input from upload.
-				tag_id: tag to enable
+	def run_analysis(self, prep_id: str) -> dict:
+		"""Start an analysis
 
-			Output:
-				response
-	
+		Args:
+			prep_id (str): Analysis prep id
+
+		Returns:
+			dict: Analysis ID and Job ID for analysis
+		"""
+		path = f'/api/analysis-prep/{ prep_id }/analyze'
+		data = JSONResponseHandler(self.post(path)).get_data()
+		return data
+
+
+	def upload_run_analysis(self, project: int, file_names: List[str]) -> dict:
+		pass
+
+	def get_all_analysis(self, project: int) -> list:
+		"""Get list of analysis details for analysis associated with a project
+
+		Args:
+			project (int): Project ID
+
+		Returns:
+			list: List of analysis details
+		"""
+		path = f'/api/projects/{ project }/analyses'
+		data = JSONResponseHandler(self.get(path)).get_data()
+		return data
+
+	def get_analysis(self, project: int, analysis: int) -> dict:
+		"""Obtain analysis details, such as start and finish times
+
+		Args:
+			project (int): Project ID
+			analysis (int): Analysis ID
+
+		Returns:
+			dict: Analysis details
+		"""
+		path = f'/api/projects/{ project }/analyses/{ analysis }'
+		data = JSONResponseHandler(self.get(path)).get_data()
+		return data
+
+	def name_analysis(self, project: int, analysis: int, name: str):
+		"""Set a name for a specific analysis
+
+		Args:
+			project (int): Project ID
+			analysis (int): Analysis ID
+			name (str): New analysis name
+		"""
+		path = f'/api/projects/{ project }/analyses/{ analysis }'
+		params = {"name": name}
+		ResponseHandler(self.put(path, json_data=params)).validate()
+		return
+
+
+	def enable_display_tag(self, prep_id: str, input_id: str, tag_id: str) -> dict:
+		"""Enable an individual display tag on individual prop inputs.
+
+		Args:
+			prep_id (str): Prep ID
+			input_id (str): Input ID
+			tag_id (str): Tag
+
+		Returns:
+			dict: Input Display Info object as JSON, representing the new state of the input
 		"""
 		res = self.toggle_display_tag(prep_id, input_id, tag_id, True)
 		return res
 
-	def disable_display_tag(self, prep_id, input_id, tag_id):
-		""" Enable individual display tags on individual prop inputs.
+	def disable_display_tag(self, prep_id: str, input_id: str, tag_id: str) -> dict:
+		"""Disable an individual display tag on individual prop inputs.
 
-			Disabled tags will cause a file to be treated as if that tag were not there, for analysis purposes.
+		Args:
+			prep_id (str): Prep ID
+			input_id (str): Input ID
+			tag_id (str): Tag
 
-			Args:
-				prep_id: Accepts a string as a prep id.
-				input_id: input from upload.
-				tag_id: tag to disable
-
-			Output:
-				response
-	
+		Returns:
+			dict: Input Display Info object as JSON, representing the new state of the input
 		"""
-		res = self.toggle_display_tag(prep_id, input_id, tag_id, False)
-		return res	
-
-	def run_analysis(self, prep_id):
-		""" Once all of the verificationErrors in an Analysis Prep are addressed, an analysis can be started.
-
-			Args:
-				prep_id: Accepts a string as a prep id.
-
-			Output:
-				response
-	
-		"""
-		self.type_check(prep_id, str, "Prep_id")
-		local_url = '/api/analysis-prep/%s/analyze' % prep_id
-		data = JSONResponseHandler(self.post(local_url)).get_data()
-		return data
-
-	def get_all_analysis(self, proj):
-		""" Obtain analysis details for a project, such as start and finish times.
-
-			Args:
-				proj: project name or id.
-
-			Output:
-				response
-	
-		"""
-		self.projects_api.update_projects()
-		pid = self.projects_api.process_project(proj)
-		local_url = '/api/projects/%d/analyses' % pid
-		data = JSONResponseHandler(self.get(local_url)).get_data()
-		return data
-
-	def get_analysis(self, proj, aid):
-		""" Obtain analysis details, such as start and finish times.
-
-			Args:
-				proj: project name or id
-				aid: analysis id
-
-			Output:
-				response
-	
-		"""
-		self.type_check(aid, int, "Analysis ID")
-		self.projects_api.update_projects()
-		pid = self.projects_api.process_project(proj)
-		local_url = '/api/projects/%d/analyses/%d' % (pid, aid)
-		data = JSONResponseHandler(self.get(local_url)).get_data()
-		return data
-
-	def name_analysis(self, proj, aid, name):
-		""" Set a name for a specific analysis.
-
-			Args:
-				proj: project name or id
-				aid: analysis id
-				name: name to give the analysis
-
-			Output:
-				response
-	
-		"""
-		self.type_check(name, str, "Name")
-		self.projects_api.update_projects()
-		pid = self.projects_api.process_project(proj)
-		local_url = '/api/projects/%d/analyses/%d' % (pid, aid)
-		params = {"name": name}
-		ResponseHandler(self.put(local_url, json_data=params)).validate()
-		return
+		data = self.toggle_display_tag(prep_id, input_id, tag_id, False)
+		return data	

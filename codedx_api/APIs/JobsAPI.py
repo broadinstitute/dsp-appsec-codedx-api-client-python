@@ -1,31 +1,36 @@
 from codedx_api.APIs.BaseAPIClient import (BaseAPIClient,
-                                           ContentResponseHandler,
+                                           ContentResponseHandler, ContentType,
                                            JSONResponseHandler)
 
 
 # Jobs API Client for Code DX Projects API
 class Jobs(BaseAPIClient):
-	def __init__(self, base, api_key):
-		""" Creates an API Client for Code DX Jobs API
 
-			Args:
-				base: String representing base url from Code DX
-				api_key: String representing API key from Code DX
-				verbose: Boolean - not supported yet
 
+	def job_status(self, job: str) -> dict:
+		"""Queries the status of a running job.
+
+		Args:
+			job (str): Job id
+
+		Returns:
+			dict: Job status
 		"""
-		super().__init__(base, api_key)
-
-
-	def job_status(self, jid):
-		"""Queries the status of a job."""
-		self.type_check(jid, str, "JobId")
-		local_url = '/api/jobs/%s' % jid
-		data = JSONResponseHandler(self.get(local_url)).get_data()
+		path = f'/api/jobs/{ job }'
+		data = JSONResponseHandler(self.get(path)).get_data()
 		return data
 
-	def job_result(self, jid, accept):
-		"""Get the result of a job."""
-		local_url = '/api/jobs/%s/result' % jid
-		data = ContentResponseHandler(self.download(local_url), accept).get_data()
+
+	def job_result(self, job: str, accept: ContentType) -> str:
+		"""Fetches the result from a job.
+
+		Args:
+			job (str): Job ID
+			accept (ContentType): Job content type
+
+		Returns:
+			str: Job result is returned - the response headers and body will match the job result
+		"""
+		path = f'/api/jobs/{ job }/result'
+		data = ContentResponseHandler(self.download(path), accept).get_data()
 		return data

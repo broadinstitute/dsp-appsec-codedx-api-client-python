@@ -8,14 +8,14 @@ from requests.exceptions import ContentDecodingError
 
 class BaseAPIClient(object):
 
-	def __init__(self, base: str, api_key: str):
+	def __init__(self, base_url: str, api_key: str):
 		"""Constructor for the base CodeDx API client
 
 		Args:
-			host (str): The CodeDx base url. Must be in the correct format: https://[CODEDX-HOST]/codedx
+			base_url (str): The CodeDx base url. Must be in the correct format: https://[CODEDX-HOST]/codedx
 			api_key (str): An API key from CodeDx.
 		"""	
-		self.base_url = base
+		self.base_url = base_url
 		self.api_key = api_key
 		self.headers = {
 			'API-Key': self.api_key,
@@ -23,7 +23,7 @@ class BaseAPIClient(object):
 			'Content-Type': 'application/json'
 		}
 
-	def _compose_url(self,path: str):
+	def _compose_url(self, path: str):
 		return self.base_url + path
 
 	def _compose_headers(self,local_headers):
@@ -70,21 +70,15 @@ class BaseAPIClient(object):
 		res = requests.post(url, headers=headers, json=json_data)
 		return res
 
-	def upload(self, path, json_data, content_type='application/json;charset=utf-8', local_headers=None):
+	def upload(self, path, file_data, local_headers=None):
 		url = self._compose_url(path)
 		headers = self._compose_headers(local_headers)
-		if 'file_name' not in json_data or 'file_path' not in json_data or 'file_type' not in json_data:
-			raise Exception("Missing file data.")
-		headers = {'API-Key': self.api_key, 
-			'accept': 'application/json'}
-		if 'X-Client-Request-Id' in json_data:
-			headers['X-Client-Request-Id'] = json_data['X-Client-Request-Id']
-		f = open(json_data['file_path'], 'rb')
-		files = {
-			'file': (json_data['file_name'], f, json_data['file_type'])
-		}
-		res = requests.post(url, headers=headers, files=files)
-		f.close()
+		headers.pop('Content-Type', None)
+		with open(file_data['file_path'], 'rb') as f:
+			files = {
+				'file': (file_data['file_name'], f, file_data['file_type'])
+			}
+			res = requests.post(url, headers=headers, files=files)
 		return res
 
 	def put(self, path, json_data, content_type='application/json;charset=utf-8', local_headers=None):
@@ -101,13 +95,20 @@ class BaseAPIClient(object):
 
 
 class ContentType(str, Enum):
-    """Enumerates accepted content types"""
+	"""Enumerates accepted content types"""
+	JSON = 'application/json;charset=utf-8'
+	CSV = 'text/csv'
+	PDF = 'application/pdf'
+	XML = 'text/xml'
+	TEXT = 'text/plain'
 
-    JSON = 'application/json;charset=utf-8'
-    CSV = 'text/csv'
-    PDF = 'application/pdf'
-    XML = 'text/xml'
+	def text(self) -> str:
+		""" Get status in format that will be accepted by CodeDx
 
+		Returns:
+			str: Finding status
+		"""
+		return str(self.value)
 
 class ResponseHandler:
 	def __init__(self, response):
@@ -117,6 +118,7 @@ class ResponseHandler:
 	def validate(self):		
 		"""Validate response by raising exceptions for unexpected return values"""
 		if self.response.status_code > 299:
+			print(self.response.content)
 			self.response.raise_for_status()
 
 	def get_data(self):
@@ -124,7 +126,7 @@ class ResponseHandler:
 		self.validate()
 		if self.response.json():
 			return self.response.json()
-		return { 'status': 'Success'}
+		return None
 
 
 class JSONResponseHandler(ResponseHandler):

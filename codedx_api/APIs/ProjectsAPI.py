@@ -6,306 +6,240 @@ from codedx_api.APIs.BaseAPIClient import (BaseAPIClient, JSONResponseHandler,
 
 # Projects Client for Code DX Projects API
 class Projects(BaseAPIClient):
-	def __init__(self, base, api_key):
-		""" Creates an API Client for Code DX Projects API
+	def __init__(self, base_url: str, api_key: str):
+		"""Definitions for Projects API on CodeDx
 
-			Args:
-				base: String representing base url from Code DX
-				api_key: String representing API key from Code DX
-				verbose: Boolean - not supported yet
-
-			Output:
-				response
-
+		Args:
+			base (str): The CodeDx base URL. https://[CODEDX_INSTANCE]/codedx
+			api_key (str): CodeDx API key
 		"""
-		super().__init__(base, api_key)
-		self.roles = ['Reader', 'Updater', 'Creator', 'Manager']
+		super().__init__(base_url, api_key)
+		#TODO: don't have projects stored locally
 		self.projects = {}
 
-	def get_projects(self):
-		""" Lists all projects. Updates Projects() instance.
 
-			Args:
-				None
+	def __query_criteria(self, filters: dict, limit: int = None, offset: int = None) -> dict:
+		"""Returns JSON body for a request to Project query endpoint
 
-			Output:
-				Dict[name] = id
+		Args:
+			filters (dict): Filters for the query results
+			limit (int, optional): Limits the number of results to return. Defaults to None.
+			offset (int, optional): Offset for the results. Specifying an offset without a limit is an error. Defaults to None.
+
+		Returns:
+			dict: [description]
 		"""
-		local_url = '/api/projects'
-		data = JSONResponseHandler(self.get(local_url)).get_data()
+		criteria = {
+			"filter": filters
+		}
+		if offset:
+			criteria['offset'] = offset
+		if limit:
+			criteria['limit'] = limit
+		return criteria
+
+
+	def get_projects(self) -> dict:
+		"""Returns the projects in a CodeDx instance
+
+		Returns:
+			dict: Returns a dictionary with a list of project names and ids
+		"""
+		path = '/api/projects'
+		data = JSONResponseHandler(self.get(path)).get_data()
 		return data
 
-	def update_projects(self):
-		res = self.get_projects()
-		if 'projects' in res:
-			for row in res['projects']:
-				self.projects[row['name']] = row['id']
+
+	def create_project(self, name: str) -> dict:
+		"""Create a new project
+
+		Args:
+			name (str): Project name
+
+		Returns:
+			dict: Project object
+		"""
+		path = '/api/projects'
+		params = {
+			"name": name
+		}
+		data = JSONResponseHandler(self.put(path, params)).get_data()
+		return data
+
+
+	def update_project(self, project: int, new_name: str = None, parent_id: int = None) -> None:
+		"""Update a project by changing its name or parent
+
+		Args:
+			project (int): Project id
+			new_name (str, optional): New name for the project. Defaults to None.
+			parentId (int, optional): New parent ID for the project. Defaults to None.
+		"""
+		path = f'/api/projects/{ project }'
+		params = {}
+		if parent_id:
+			params['parentId'] = parent_id
+		if new_name:
+			params['name'] = new_name
+		ResponseHandler(self.put(path, json_data=params)).validate()
+		return
+
+
+	def delete_project(self, project: int) -> None:
+		"""Delete a project
+
+		Args:
+			project (int): Project id
+		"""
+		path = f'/api/projects/{ project }'
+		ResponseHandler(self.delete(path)).validate()
+		return
+
+
+	def query_projects(self, filters: dict, limit: int = None, offset: int = None) -> list:
+		"""Returns the results of a query as a list of project dictionaries
+
+		Args:
+			filters (dict): Filters for the query results
+			limit (int, optional): Limits the number of results to return. Defaults to None.
+			offset (int, optional): Offset for the results. Specifying an offset without a limit is an error. Defaults to None.
+
+		Returns:
+			list: List of projects
+		"""
+		path = '/api/projects/query'
+		criteria = self.__query_criteria(filters, offset, limit)
+		data = JSONResponseHandler(self.post(path, json_data=criteria)).get_data()
+		return data
+
+
+	def query_count(self, filters: dict) -> int:
+		"""Count of projects matching given criteria
+
+		Args:
+			filters (dict): Filters for the query criteria
+
+		Returns:
+			int: Number of projects fitting the filters
+		"""
+		path = '/api/projects/query/count'
+		criteria = self.__query_criteria(filters)
+		data = JSONResponseHandler(self.post(path, json_data=criteria)).get_data()
+		return data
+
+
+	def project_status(self, project: int) -> dict:
+		"""Provides information on all valid triage statuses for a project.
+
+		Args:
+			project (int): Project id
+
+		Returns:
+			dict: Project statuses
+		"""
+		path = f'/api/projects/{ project }/statuses'
+		data = JSONResponseHandler(self.get(path)).get_data()
+		return data
+
+
+	def file_mappings(self, project: int, files: dict) -> dict:
+		"""Provides source path mappings for a project.
+
+		Args:
+			project (int): Project id
+			files (dict): Dictionary with files keyword and list of files
+
+		Returns:
+			dict: Contains the dictionary of file path mappings
+		"""
+		url = f'/api/projects/{ project }/files/mappings'
+		data = JSONResponseHandler(self.post(url, json_data=files)).get_data()
+		return data
+
+
+	def project_files(self, project: int) -> list:
+		"""Provides a list of files for a project.
+
+		Args:
+			project (int): Project id
+
+		Returns:
+			list: list of files
+		"""
+		path = f'/api/projects/{ project }/files'
+		data = JSONResponseHandler(self.get(path)).get_data()
+		return data
+
+
+	def project_roles(self, project: int) -> list:
+		"""Provides a list of all User roles.
+
+		Args:
+			project (int): project ID
+
+		Returns:
+			list: list of users and their roles for the project
+		"""
+		path = f'/api/projects/{ project }/user-roles'
+		data = JSONResponseHandler(self.get(path)).get_data()
+		return data
+
+
+	def project_user(self, project: int, user: int) -> dict:
+		"""Provides a User Role for a given user.
+
+		Args:
+			project (int): Project id
+			user (int): User id
+
+		Returns:
+			dict: Contains the user role for the given user
+		"""
+		path = f'/api/projects/{ project }/user-roles/user/{ user }'
+		data = JSONResponseHandler(self.get(path)).get_data()
+		return data
+
+
+	def update_user_role(self, project: int, user: int, roles: dict) -> None:
+		"""Allows changing user roles.
+
+		Note that you must specify the entire set of roles each time;
+		if you fail to include a role when using this method,
+		the user will lose that role.
+		Args:
+			project (int): Project id
+			user (int): User id
+			roles (dict): dictionary of user roles
+		"""
+		path = f'/api/projects/{ project }/user-roles/user/{ user }'
+		ResponseHandler(self.put(path, json_data=roles)).validate()
+		return
+
 
 	def print_projects(self):
-		"""Prints the current list of projects."""
+		"""Prints a sorted list of project names and ids."""
 		print("Project (ID)\n==============")
-		for name in sorted(self.projects.keys()):
-			print("%s (%d)" % (name, self.projects[name]))
+		data = self.get_projects()
+		projects = data['projects']
+		for project in sorted(projects, key = lambda i: i['name']):
+			name = project["name"]
+			pid = project["id"]
+			print(f"{ name } ({ pid })")
 
-	def validate_name(self, name):
-		"""Returns a valid project name."""
-		if len(self.projects) == 0:
-			self.update_projects()
-		if name not in self.projects:
-			raise Exception("Not a valid project name.")
-		return name
 
-	def validate_id(self, pid):
-		"""Returns a valid project id."""
-		if len(self.projects) == 0:
-			self.update_projects()
-		if pid not in self.projects.values():
-			raise Exception("Not a valid project id.")
-		return pid
+	def get_project_id(self, name: str) -> int:
+		"""Gets the project id
 
-	def get_id(self, name):
-		"""Given a project name, returns a valid project id."""
-		self.validate_name(name)
-		return self.projects[name]
+		Args:
+			name (str): Name of the project on CodeDx
 
-	def get_name(self, pid):
-		"""Given a project name, returns a valid project id."""
-		self.validate_id(pid)
-		for key in self.projects:
-			if pid == self.projects[key]:
-				return key
-		raise Exception("Not a valid project id.")
-
-	def process_project(self, proj):
-		""" Given a project name or id, returns a valid project id. """
-		if isinstance(proj, str):
-			return self.get_id(proj)
-		elif isinstance(proj, int):
-			return self.validate_id(proj)
-		raise Exception("Invalid Input.")
-
-	def project_status(self, proj):
-		""" Provides information on all valid triage statuses for a project.
-
-			Accepts either a project name or id.
-
+		Returns:
+			int: Project id
 		"""
-		pid = self.process_project(proj)
-		local_url = '/api/projects/%d/statuses' % pid
-		data = JSONResponseHandler(self.get(local_url)).get_data()
-		return data
+		filters = {
+			"name": name
+		}
+		projects = self.query_projects(filters)
+		project_id = next((project["id"] for project in projects if project["name"] == name), None)
 
-	def project_files(self, proj):
-		""" Provides a list of files for a project.
-
-			Accepts either a project name or id.
-
-		"""
-		pid = self.process_project(proj)
-		local_url = '/api/projects/%d/files' % pid
-		data = JSONResponseHandler(self.get(local_url)).get_data()
-		return data
-
-	def project_roles(self, proj):
-		""" Provides a list of all User roles.
-
-			Accepts either a project name or id.
-
-		"""
-		pid = self.process_project(proj)
-		local_url = '/api/projects/%d/user-roles' % pid
-		data = JSONResponseHandler(self.get(local_url)).get_data()
-		return data
-
-	def project_user(self, proj, uid):
-		""" Provides a User Role for a given user.
-
-			Accepts either a project name or id. Requires a user id.
-
-		"""
-		pid = self.process_project(proj)
-		local_url = '/api/projects/%d/user-roles/user/%d' % (pid, uid)
-		data = JSONResponseHandler(self.get(local_url)).get_data()
-		return data
-
-	def create_project(self, name):
-		""" Creates a project.
-
-			Accepts project name.
-
-		"""
-		if name in self.projects:
-			raise Exception("Project name already exists.")
-		if re.search('[a-zA-Z]', name) is None:
-			raise Exception("Did not input a valid name.")
-		local_url = '/api/projects'
-		params = {"name": name}
-		data = JSONResponseHandler(self.put(local_url, params)).get_data()
-		self.projects[data['name']] = data['id']
-		return data
-
-	def delete_project(self, proj):
-		""" Deletes a project.
-
-			Accepts either a project name or a project id.
-
-		"""
-		pid = self.process_project(proj)
-		local_url = '/api/projects/%d' % pid
-		ResponseHandler(self.delete(local_url)).validate()
-		return
-
-	def update_project(self, proj, new = None, parentId = None):
-		""" Update a project by changing its name or parent.
-
-			Accepts either a project name or a project id and parameters to update.
-
-		"""
-		pid = self.process_project(proj)
-		old_name = self.get_name(pid)
-		local_url = '/api/projects/%d' % pid
-		params = {}
-		if parentId is None and new is None:
-			raise Exception("No input given to update.")
-		if parentId is not None:
-			params['parentId'] = parentId
-		if new is not None:
-			params['name'] = new
-		ResponseHandler(self.put(local_url, json_data=params)).validate()
-		return
-
-	# might want to move into codedx wrapper....
-	def update_user_roles(self, proj, uid, roles, add):
-		""" Update a user by adding or removing roles.
-
-			Accepts a project name or id, a user id, and a list of roles to add.
-			A user can have reader, updater, creator, and manager roles.
-
-		"""
-		pid = self.process_project(proj)
-		user_roles = self.project_user(pid, uid)['roles']
-		for role in roles:
-			if role in self.roles:
-				user_roles[role] = add
-			else:
-				raise Exception("Given role is not an accepted role.")
-		local_url = '/api/projects/%d/user-roles/user/%d' % (pid, uid)
-		ResponseHandler(self.put(local_url, json_data=user_roles)).validate()
-		return
-
-	def add_user_roles(self, proj, uid, roles):
-		""" Update a user by adding roles.
-
-			Accepts a project name or id, a user id, and a list of roles to add.
-			A user can have reader, updater, creator, and manager roles.
-
-		"""
-		res = self.update_user_roles(proj, uid, roles, True)
-		return res
-
-	def rem_user_roles(self, proj, uid, roles):
-		""" Update a user by removing roles.
-
-			Accepts a project name or id, a user id, and a list of roles to remove.
-			A user can have reader, updater, creator, and manager roles.
-
-		"""
-		res = self.update_user_roles(proj, uid, roles, False)
-		return res
-
-	def add_user_role(self, proj, uid, role):
-		""" Update a user by adding a role.
-
-			Accepts a project name or id, a user id, and a role to add.
-			A user can have reader, updater, creator, and manager roles.
-
-		"""
-		res = self.update_user_roles(proj, uid, [role], True)
-		return res
-
-	def rem_user_role(self, proj, uid, role):
-		""" Update a user by removing a role.
-
-			Accepts a project name or id, a user id, and a role to add.
-			A user can have reader, updater, creator, and manager roles.
-
-		"""
-		res = self.update_user_roles(proj, uid, [role], False)
-		return res
-
-
-	def query_base(self, url, name, metadata, parentId, offset, limit):
-		""" Gets the number of projects or a list of projects which match some filter/query criteria, and which you are allowed to view.
-
-			Args:
-				Accepts at least one filter:
-					- name <String>: Each matching project should contain the given text in their name
-					- metadata <Dict>: A dictionary containing project metadata fields and their respective search criteria
-					- parentId <Int> or None: If int, each matching project should be a direct child of the parent. If null, each matching project should be top level
-				Limit <Int>: The maximum number or results
-				Offest <Int>: An offset to the limit. Specifying and offset with a limit is an error.
-
-		"""
-		if name is None and metadata is None and parentId is None:
-			raise Exception("Need a filter to query.")
-		if offset is not None and limit is None:
-			raise Exception("Cannot specify an offset without a limit.")
-		params = {}
-		filters = {}
-		if name is not None and self.type_check(name, str, "Project name") : filters['name'] = name
-		if metadata is not None and self.type_check(metadata, dict, "Metadata") : filters['metadata'] = metadata
-		# parent Id can be an integer or null
-		if parentId is not False and (parentId is None or self.type_check(parentId, int, "Parent Id")) : filters['parentId'] = parentId
-		params['filter'] = filters
-		if offset is not None and self.type_check(offset, int, "Offset") : params['offset'] = offset
-		if limit is not None and self.type_check(limit, int, "Limit") : params['limit'] = limit
-		if (offset or limit) and (offset < 0 or limit < 1):
-			raise Exception("Limit and offset must be a positive integer")
-		data = JSONResponseHandler(self.post(url, json_data=params)).get_data()
-		return data
-
-	def query(self, name=None, metadata=None, parentId=False, offset=None, limit=None):
-		""" Gets a list of projects which match some filter/query criteria, and which you are allowed to view.
-
-			Args:
-				Accepts at least one filter:
-					- name <String>: Each matching project should contain the given text in their name
-					- metadata <Dict>: A dictionary containing project metadata fields and their respective search criteria
-					- parentId <Int> or None: If int, each matching project should be a direct child of the parent. If null, each matching project should be top level
-				Limit <Int>: The maximum number or results
-				Offest <Int>: An offset to the limit. Specifying and offset with a limit is an error.
-
-		"""
-		local_url = '/api/projects/query'
-		res = self.query_base(local_url, name, metadata, parentId, offset, limit)
-		return res
-
-	def query_count(self, name=None, metadata=None, parentId=False):
-		""" Gets the number of projects which match some filter/query criteria, and which you are allowed to view.
-
-			Args:
-				Accepts at least one filter:
-					- name <String>: Each matching project should contain the given text in their name
-					- metadata <Dict>: A dictionary containing project metadata fields and their respective search criteria
-					- parentId <Int> or None: If int, each matching project should be a direct child of the parent. If null, each matching project should be top level
-				Limit and offset are accepted but ignored.
-
-		"""
-		offset = None
-		limit = None
-		local_url = '/api/projects/query/count'
-		res = self.query_base(local_url, name, metadata, parentId, offset, limit)
-		return res
-
-	def file_paths(self, proj, files):
-		""" Provides source path mappings for a project.
-
-			Accepts a list of strings representing files.
-
-		"""
-		pid = self.process_project(proj)
-		self.type_check(files, list, "Files ")
-		params = {"files": files}
-		url = '/api/projects/%d/files/mappings' % pid
-		data = JSONResponseHandler(self.post(url, json_data=params)).get_data()
-		return data
+		return project_id
