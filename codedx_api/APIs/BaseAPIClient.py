@@ -14,7 +14,7 @@ class BaseAPIClient(object):
 		Args:
 			base_url (str): The CodeDx base url. Must be in the correct format: https://[CODEDX-HOST]/codedx
 			api_key (str): An API key from CodeDx.
-		"""	
+		"""
 		self.base_url = base_url
 		self.api_key = api_key
 		self.headers = {
@@ -118,7 +118,7 @@ class ResponseHandler:
 	def validate(self):		
 		"""Validate response by raising exceptions for unexpected return values"""
 		if self.response.status_code > 299:
-			print(self.response.content)
+			logging.warning(f"Error from CodeDx: { self.response.content }")
 			self.response.raise_for_status()
 
 	def get_data(self):

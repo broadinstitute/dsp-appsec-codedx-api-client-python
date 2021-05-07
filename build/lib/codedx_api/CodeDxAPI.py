@@ -1,16 +1,32 @@
+import logging
 import time
 
-from codedx_api.APIs import (ActionsAPI, AnalysisAPI, FindingsAPI, JobsAPI,
-                             ProjectsAPI, ReportsAPI)
+from codedx_api.APIs import (Actions, Analysis, Findings, Jobs, Projects,
+                             Reports)
 from codedx_api.APIs.BaseAPIClient import ContentType
 
 
-class CodeDx(ProjectsAPI.Projects, ReportsAPI.Reports, JobsAPI.Jobs, AnalysisAPI.Analysis, ActionsAPI.Actions, FindingsAPI.Findings):
+class CodeDx(Projects, Reports, Jobs, Analysis, Actions, Findings):
 
 
-	def __init__(self, base, api_key):
-		"""Create a codeDx APIclient."""
+	def __init__(self, base: str, api_key: str, verbose: bool = False):
+		"""CodeDx API
+
+		Args:
+			base (str): CodeDx URL. Should be in the form of "https://[your-instance]/codedx".
+			api_key (str): API Key from CodeDx.
+			verbose (bool): Set logging level to info.
+		"""		
 		super().__init__(base, api_key)
+		if verbose:
+			logging.basicConfig(
+				level=logging.INFO,
+				format='[CODEDX-API %(levelname)s] %(message)s'
+			)
+		else:
+			logging.basicConfig(
+				format='[CODEDX-API %(levelname)s] %(message)s'
+			)
 
 
 	def download_report(self, data: str, file_name: str) -> None:
@@ -34,9 +50,12 @@ class CodeDx(ProjectsAPI.Projects, ReportsAPI.Reports, JobsAPI.Jobs, AnalysisAPI
 		Returns:
 			dict: Job object
 		"""
+		timeout = time.time() + 60*10
 		while "status" not in job or job["status"] != "completed":
-			print(job_desc)
+			if time.time() > timeout:
+				raise RuntimeError(f"Timeout waiting for job to complete: { job_desc }")
 			time.sleep(1)
+			logging.info(job_desc)
 			job = self.job_status(job["jobId"])
 		return job
 
@@ -51,7 +70,7 @@ class CodeDx(ProjectsAPI.Projects, ReportsAPI.Reports, JobsAPI.Jobs, AnalysisAPI
 		"""		
 		description = f"Waiting for { content_type } report generation."
 		self.wait_for_job(job, description)
-		print("Downloading report...")
+		logging.info("Report successfully generated. Downloading report.")
 		res = self.job_result(job["jobId"], content_type)
 		self.download_report(res, file_name)
 		return
@@ -144,24 +163,22 @@ class CodeDx(ProjectsAPI.Projects, ReportsAPI.Reports, JobsAPI.Jobs, AnalysisAPI
 		Returns:
 			dict: Analysis object.
 		"""		
-		print("Creating analysis...")
+		logging.info(f"Creating analysis for { project }.")
 		pid = self.get_project_id(project)
 		prep = self.create_analysis(pid)
 		prep_id = prep["prepId"]
-		print("Uploading report...")
+		logging.info(f"Uploading report { file_name } to { project } analysis.")
 		ext_analysis = self.upload_analysis(prep_id, file_name)
 		self.wait_for_job(ext_analysis, "Analyzing external report content.")
 		prep = self.get_prep(prep_id)
 		if 'verificationErrors' in prep and len(prep['verificationErrors']) > 0:
-			print("Verification Errors:")
-			for error in prep['verificationErrors']:
-				print(error)
+			logging.warning(f"Verification Errors in { file_name }: { prep['verificationErrors'] }")
 			raise ValueError("Fix verification errors in external vulnerability report.")
 		else:
 			analysis_job = self.run_analysis(prep_id)
-			self.wait_for_job(analysis_job, "Running analysis.")
+			self.wait_for_job(analysis_job, f"Running analysis for { project }.")
 			analysis = self.get_analysis(pid, analysis_job["analysisId"])
-			print("Analysis complete.")
+			logging.info(f"Analysis complete. Vulnerability report { file_name } successsfully uploaded to { project }.")
 			return analysis
 
 
@@ -176,8 +193,7 @@ class CodeDx(ProjectsAPI.Projects, ReportsAPI.Reports, JobsAPI.Jobs, AnalysisAPI
 		pid = self.get_project_id(project)
 		if not filters:
 			filters = {}
-		print("Updating bulk statuses...")
+		logging.info(f"Updating statuses in { project }.")
 		job = self.bulk_status_update(pid, status, filters)
-		self.wait_for_job(job, "Waiting for statuses to update...")
-		msg = "Bulk status update (%s) for project %s" % (status, project)
-		print(msg)
+		self.wait_for_job(job, "Waiting for statuses to update.")
+		logging.info(f"Completed bulk status update \"{ status }\" for project { project }.")

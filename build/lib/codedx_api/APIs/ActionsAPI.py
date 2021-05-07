@@ -1,6 +1,5 @@
 from codedx_api.APIs.BaseAPIClient import BaseAPIClient, JSONResponseHandler
 from codedx_api.APIs.FindingsAPI import FindingStatus
-from codedx_api.APIs.ProjectsAPI import Projects
 
 
 # Actions API Client for Code DX Projects API

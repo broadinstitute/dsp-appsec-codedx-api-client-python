@@ -1,7 +1,7 @@
 import re
 
+from codedx_api.APIs import Projects
 from codedx_api.APIs.BaseAPIClient import BaseAPIClient, JSONResponseHandler
-from codedx_api.APIs.ProjectsAPI import Projects
 
 
 # Reports Client for Code DX Projects API
