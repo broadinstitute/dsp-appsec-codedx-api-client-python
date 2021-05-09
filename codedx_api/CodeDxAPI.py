@@ -165,6 +165,9 @@ class CodeDx(Projects, Reports, Jobs, Analysis, Actions, Findings):
 		"""		
 		logging.info(f"Creating analysis for { project }.")
 		pid = self.get_project_id(project)
+		if not pid:
+			new_project = create_project(project)
+			pid = new_project["id"]
 		prep = self.create_analysis(pid)
 		prep_id = prep["prepId"]
 		logging.info(f"Uploading report { file_name } to { project } analysis.")
