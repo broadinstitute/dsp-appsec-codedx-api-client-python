@@ -3,7 +3,7 @@ from enum import Enum
 
 import requests
 from requests import Response
-from requests.exceptions import ContentDecodingError
+from requests.exceptions import ContentDecodingError, HTTPError
 
 
 class BaseAPIClient(object):
@@ -118,8 +118,12 @@ class ResponseHandler:
 	def validate(self):		
 		"""Validate response by raising exceptions for unexpected return values"""
 		if self.response.status_code > 299:
-			logging.warning(f"Error from CodeDx: { self.response.content }")
-			self.response.raise_for_status()
+			error = f"Error from CodeDx (Status Code {self.response.status_code})"
+			if self.response.content:
+				error += f": { self.response.content }"
+			elif self.response.text:
+				error += f": { self.response.text }"
+			raise HTTPError(error)
 
 	def get_data(self):
 		"""Temp"""
