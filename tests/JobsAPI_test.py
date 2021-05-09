@@ -1,8 +1,6 @@
 import unittest
-from unittest.mock import patch
-
+from mock import patch
 from codedx_api.APIs import JobsAPI
-from tests.MockResponses import DataMock, JSONMock
 
 # DO NOT UPDATE - MOCK REQUESTS DO NOT REQUIRE CREDENTIALS
 api_key = "0000-0000-0000-0000"
@@ -17,20 +15,31 @@ class JobsAPI_test(unittest.TestCase):
 
 	@patch('requests.get')
 	def test_job_status(self, mock_job_status):
-		mock_job_status.return_value = JSONMock()
+		mock_job_status.return_value.json.return_value =  {
+														  "jobId": "string",
+														  "status": "queued"
+														}
+		mock_job_status.return_value.status_code = 200
+		mock_job_status.return_value.headers= {"Content-Type": 'application/json;charset=utf-8'}
 		test_job = "string"
 		result = self.job_api.job_status(test_job)
-		self.assertIsInstance(result, dict)
+		self.assertTrue('jobId' in result)
+		self.assertEqual(result["jobId"], test_job)
+		self.assertTrue("status" in result)
+		with self.assertRaises(Exception):
+			self.job_api.job_status(-1)
 
 	@patch('requests.get')
 	def test_job_result(self, mock_job_result):
-		content_type = 'text/csv'
-		test_data = "test"
-		mock_job_result.return_value = DataMock(content_type, test_data)
+		mock_job_result.return_value.json.return_value =  "\"Project Hierarchy\",\"ID\",\"First Seen\"\n\"CRSP Portal\",\"8469\",\"2019-07-24T18:13:28Z\""
+		mock_job_result.return_value.status_code = 200
+		mock_job_result.return_value.headers= {"Content-Type": 'text/csv'}
 		test_job = "string"
 		result = self.job_api.job_result(test_job, 'text/csv')
 		self.assertTrue(result is not None)
-		self.assertIsInstance(result, str)
+		with self.assertRaises(Exception):
+			test_job = "string"
+			result = self.job_api.job_result(test_job)
 
 if __name__ == '__main__':
     unittest.main()

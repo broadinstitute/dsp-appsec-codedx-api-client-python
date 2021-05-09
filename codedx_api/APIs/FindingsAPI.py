@@ -1,188 +1,167 @@
-from enum import Enum
-from typing import List
-
-from codedx_api.APIs.BaseAPIClient import (BaseAPIClient,
-                                           ContentResponseHandler, ContentType,
-                                           JSONResponseHandler)
-
-
-class FindingStatus(str, Enum):
-	"""Enumeration of finding status types"""    
-	FIXED = "fixed",
-	MITIGATED = "mitigated",
-	IGNORED = "ignored",
-	FP = "false-positive",
-	GONE = "gone",
-	UNRESOLVED = "unresolved",
-	ESCALATED = "escalated"
-
-
-	def __contains__(cls, item):
-		try:
-			cls(item)
-		except ValueError:
-			return False
-		return True    
-
-
-	def __str__(self):
-		return str(self.name).lower()
-
-	def format(self) -> str:
-		"""Get status in format that will be accepted by CodeDx
-
-		Returns:
-			str: Finding status
-		"""
-		return str(self.value)
-
-	@classmethod
-	def print_statuses(cls):
-		"""Prints the list of statuses available on CodeDx (Feb 2021)"""	
-		for status in cls:
-			print(status)
-
+from codedx_api.APIs.BaseAPIClient import BaseAPIClient
+from codedx_api.APIs.ProjectsAPI import Projects
 
 class Findings(BaseAPIClient):
+	def __init__(self, base, api_key, verbose = False):
+		"""Iniitilize"""
+		super().__init__(base, api_key, verbose)
+		self.projects_api = Projects(base, api_key)
 
-	def get_finding(self, finding: int, options: List[str] = None) -> dict:
-		"""Returns metadata for the given finding
+	def get_finding(self, fid, options=None):
+		""" Returns metadata for the given finding.
 
-		Args:
-			finding (int): Finding id
-			options (List[str], optional): The expand parameter is a comma separated list, which can modify the reponse. Defaults to None.
+			Can include a list of optional expanders to include more information
+			Available values: descriptions, descriptor, issue, triage-time, results, results.descriptions, results.descriptor, results.metadata, results.variants
 
-		Returns:
-			dict: [description]
+			Args:
+				fid: finding id
+				options: additional information on finding
+
+			Output:
+				response
+
 		"""
-		path = f"/api/findings/{ finding }"
+		self.type_check(fid, int, "Findings ID")
+		local_url = f"/api/findings/{ fid }"
 		if options:
-			expanders = ",".join(options)
-			query = f'?expand={ expanders }'
-			path += query
-		data = JSONResponseHandler(self.get(path)).get_data()
-		return data
-
-
-	def get_finding_description(self, finding: int) -> dict:
-		"""Returns the descriptions for the given finding from all available sources.
-
-		Args:
-			finding (int): Finding id
-
-		Returns:
-			dict: Contains the description(s) for the finding
-		"""
-		path = f"/api/findings/{ finding }/description"
-		data = JSONResponseHandler(self.get(path)).get_data()
-		return data
-
-
-	def get_finding_history(self, finding: int) -> list:
-		"""Responds with an array of "activity event" objects.
-
-		Args:
-			finding (int): Finding id
-
-		Returns:
-			list: An array of "activity event" objects
-		"""
-		path = f"/api/findings/{ finding }/history"
-		data = JSONResponseHandler(self.get(path)).get_data()
-		return data
-
-
-	def get_finding_table(self, project: int, options: List[str] = None, req_body: dict = None) -> dict:
-		"""Returns filtered finding table data.
-
-		Args:
-			project (int): Project id
-			options (List[str], optional): The expand parameter is a comma separated list. Defaults to None.
-			req_body (dict, optional): Filters, pagination options. Defaults to None.
-
-		Returns:
-			dict: [description]
-		"""
-		path = f"/api/projects/{ project }/findings/table"
-		if options:
+			self.type_check(options, list, "Optional expanders")
 			query = "?expand=" + ",".join(options)
-			path += query
-		if not req_body: 
-			req_body = {}
-		data = JSONResponseHandler(self.post(path, json_data=req_body)).get_data()
-		return data
+			local_url += query
+		res = self.call("GET", local_url)
+		return res
 
+	def get_finding_description(self, fid):
+		""" Returns the descriptions for the given finding from all available sources.
 
-	def get_finding_count(self, project: int, req_body: dict = None) -> dict:
-		"""Returns the count of all findings in the project matching the given filter.
+			Args:
+				fid: finding id
 
-		Args:
-			project (int): Project ID
-			req_body (dict, optional): Filters, pagination options. Defaults to None.
+			Output:
+				response
 
-		Returns:
-			dict: Dictionary with project finding count
 		"""
-		path = f"/api/projects/{ project }/findings/count"
+		self.type_check(fid, int, "Findings ID")
+		local_url = f"/api/findings/{ fid }/description"
+		res = self.call("GET", local_url)
+		return res
+
+	def get_finding_history(self, fid):
+		""" Responds with an array of “activity event” objects in JSON.
+
+			Args:
+				fid: finding id
+
+			Output:
+				response
+
+		"""
+		self.type_check(fid, int, "Findings ID")
+		local_url = f"/api/findings/{ fid }/history"
+		res = self.call("GET", local_url)
+		return res
+
+	def get_finding_table(self, proj, options=None, req_body=None):
+		""" Returns filtered finding table data.
+
+			This endpoint is a candidate to become a more generic querying API; presently it just returns the data required for the findings table as it exists today.
+
+			Args:
+				fid: finding id
+				options: additional information on finding
+				query: query info
+
+			Output:
+				response
+
+		"""
+		self.projects_api.update_projects()
+		pid = self.projects_api.process_project(proj)
+		local_url = f"/api/projects/{ pid }/findings/table"
+		if options:
+			self.type_check(options, list, "Optional expanders")
+			query = "?expand=" + ",".join(options)
+			local_url += query
 		if not req_body: req_body = {}
-		data = JSONResponseHandler(self.post(path, json_data=req_body)).get_data()
-		return data
+		res = self.call("POST", local_path=local_url, json_data=req_body)
+		return res
+		
 
+	def get_finding_count(self, proj, req_body=None):
+		""" Returns the count of all findings in the project matching the given filter.
 
-	def get_finding_group_count(self, project: int, req_body: dict) -> list:
-		"""Returns filtered finding counts, grouped by the specified field.
+			Args:
+				proj: project name or id
+				query: query info
 
-		Args:
-			project (int): [description]
-			req_body (dict): Dictionary with "countBy" key and filters.
+			Output:
+				response
 
-		Returns:
-			list: Grouped counts
 		"""
-		path = f"/api/projects/{ project }/findings/grouped-counts"
-		data = JSONResponseHandler(self.post(path, json_data=req_body)).get_data()
-		return data
+		self.projects_api.update_projects()
+		pid = self.projects_api.process_project(proj)
+		local_url = f"/api/projects/{ pid }/findings/count"
+		if not req_body: req_body = {}
+		res = self.call("POST", local_path=local_url, json_data=req_body)
+		return res
 
+	def get_finding_group_count(self, proj, req_body=None):
+		""" Returns filtered finding table data.
 
-	def get_finding_flow(self, project: int, req_body: dict) -> list:
-		"""Returns filtered finding flow data.
+			This endpoint is a candidate to become a more generic querying API; presently it just returns the data required for the findings table as it exists today.
 
-		Args:
-			project (int): Project ID
-			req_body (dict): Filters
-		Returns:
-			list: Contains the filtered flow data
+			Args:
+				proj: project name or id
+				query: query info
+
+			Output:
+				response
+
 		"""
-		path = f"/api/projects/{ project }/findings/flow"
-		data = JSONResponseHandler(self.post(path, json_data=req_body)).get_data()
-		return data
+		self.projects_api.update_projects()
+		pid = self.projects_api.process_project(proj)
+		local_url = f"/api/projects/{ pid }/findings/grouped-counts"
+		if not req_body: req_body = {}
+		res = self.call("POST", local_path=local_url, json_data=req_body)
+		return res
 
+	def get_finding_flow(self, proj, req_body=None):
+		""" Returns filtered finding table data.
 
-	def get_finding_file(self, project: int, path_id: int) -> str:
-		"""Returns the contents of a given file, as long as it is a text file.
+			This endpoint is a candidate to become a more generic querying API; presently it just returns the data required for the findings table as it exists today.
 
-		Args:
-			project (int): Project id
-			path_id (int): Path id
+			Args:
+				proj: project name or id
+				flow_req: See CodedX API
 
-		Returns:
-			str: Contains the requested file's content
+			Output:
+				response
+
 		"""
-		path = f"/api/projects/{ project }/files/{ path_id }"
-		data = ContentResponseHandler(self.get(path), ContentType.TEXT.text()).get_data()
-		return data
+		self.projects_api.update_projects()
+		pid = self.projects_api.process_project(proj)
+		local_url = f"/api/projects/{ pid }/findings/flow"
+		if not req_body: req_body = {}
+		res = self.call("POST", local_path=local_url, json_data=req_body)
+		return res
 
+	def get_finding_file(self, proj, path):
+		""" Returns the contents of a given file, as long as it is a text file.
 
-	def get_finding_file(self, project: int, file_path: str) -> str:
-		"""Returns the contents of a given file, as long as it is a text file.
+			Args:
+				proj: project name or id
+				path: path to codedx file - string or int
 
-		Args:
-			project (int): Project id
-			file_path (str): The literal path to the file
+			Output:
+				response
 
-		Returns:
-			str: Contains the requested file's content
 		"""
-		path = f"/api/projects/{ project }/files/tree/{ file_path }"
-		data = ContentResponseHandler(self.get(path), ContentType.TEXT.text()).get_data()
-		return data
+		self.projects_api.update_projects()
+		pid = self.projects_api.process_project(proj)
+		if isinstance(path, str):
+			local_url = f"/api/projects/{ pid }/files/tree/{ path }"
+		elif isinstance(path, int):
+			local_url = f"/api/projects/{ pid }/files/{ path }"
+		else:
+			raise Exception("File path must be either string or int.")
+		res = self.call("GET", local_url)
+		return res

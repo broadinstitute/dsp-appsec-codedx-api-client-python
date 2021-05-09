@@ -19,6 +19,5 @@ tests/AnalysisAPI_test.py
 tests/CodeDxAPI_test.py
 tests/FindingsAPI_test.py
 tests/JobsAPI_test.py
-tests/MockResponses.py
 tests/ProjectsAPI_test.py
 tests/__init__.py
