@@ -1,10 +1,12 @@
-from codedx_api.APIs.BaseAPIClient import BaseAPIClient
-from codedx_api.APIs.ProjectsAPI import Projects
 import re
+
+from codedx_api.APIs import Projects
+from codedx_api.APIs.BaseAPIClient import BaseAPIClient, JSONResponseHandler
+
 
 # Reports Client for Code DX Projects API
 class Reports(BaseAPIClient):
-	def __init__(self, base, api_key, verbose = False):
+	def __init__(self, base, api_key):
 		""" Creates an API Client for Code DX Projects API
 
 			Args:
@@ -13,7 +15,7 @@ class Reports(BaseAPIClient):
 				verbose: Boolean - not supported yet
 
 		"""
-		super().__init__(base, api_key, verbose)
+		super().__init__(base, api_key)
 		self.report_columns = [
 			"projectHierarchy",
 			"id",
@@ -29,137 +31,179 @@ class Reports(BaseAPIClient):
 			"loc.path",
 			"loc.line"
 		]
-		self.projects_api = Projects(base, api_key, verbose)
+		self.projects_api = Projects(base, api_key)
 
-	def report_types(self, proj):
-		""" Provides a list of report types for a project.
+	def report_types(self, project: int) -> dict:
+		"""Provides a list of report types for a project.
 
-			Each report type (pdf, csv, xml, nessus, and nbe) has a different set of configuration options. These configuration options are important with respect to generating a report.
+		Args:
+			project (int): Project id
 
+		Returns:
+			dict: Report types and report configuration options
 		"""
-		pid = self.projects_api.process_project(proj)
-		local_url = '/api/projects/%d/report/types' % pid
-		res = self.call("GET", local_url)
-		return res
+		path = f'/api/projects/{ project }/report/types'
+		data = JSONResponseData(self.get(path)).get_data()
+		return data
 
-	def generate(self, pid, report_type, config, filters=None):
-		""" Allows user to queue a job to generate a report.
+	def generate(self, project: int, report_type: str, config: dict, filters: dict = None) -> dict:
+		"""Allows user to queue a job to generate a report.
 
-			Each report type has a different set of configuration options that can be obtained from the Report Types endpoint.
+		Args:
+			project (int): Project id
+			report_type (str): Report type
+			config (dict): Report configuration options
+			filters (dict, optional): Filters for findings in report. Defaults to None.
 
-å		"""
-		params = {}
-		params["filter"] = filters
-		params["config"] = config
-		if not filters: filters = {}
-		local_url = '/api/projects/%d/report/%s' % (pid, report_type)
-		res = self.call("POST", local_url, params)
-		return res
-
-	def generate_pdf(self, proj, summary_mode="simple", details_mode="with-source", include_result_details=False, include_comments=False, include_request_response=False, filters=None):
-		""" Allows user to queue a job to generate a pdf report. Returns jobId and status.
-
-			Args:
-				summary_mode <String>: Executive summary. One of "none", "simple", or "detailed". Default is "simple".
-				details_mode <String>: Finding details. One of "none", "simple", or "with-source". Default is "with-source".
-				include_result_details <Boolean>: Include result provided details. Default is false.
-				include_comments <Boolean>: Include comments. Default is false.
-				include_request_response <Boolean>: Include HTTP requests and responses. Default is false.
-
+		Returns:
+			dict: Data about the queued reporting task wth jobId and inputID
 		"""
-		pid = self.projects_api.process_project(proj)
-		if not filters: filters = {}
-		config = {}
-		if summary_mode not in ["none", "simple", "detailed"]: raise Exception("Invalid summary mode input.")
-		config["summaryMode"] = summary_mode
-		if details_mode not in ["none", "simple", "with-source"]: raise Exception("Invalid details mode input given.")
-		config["detailsMode"] = details_mode
-		self.type_check(include_result_details, bool, "Include_result_details")
-		config["includeResultDetails"] = include_result_details
-		self.type_check(include_comments, bool, "Include_comments")
-		config["includeComments"] = include_comments
-		self.type_check(include_request_response, bool, "include_request_response")
-		config["includeRequestResponse"] = include_request_response
-		res = self.generate(pid, "pdf", config, filters)
-		return res
+		params = {
+			"config": config
+		}
+		if filters:
+			params["filter"] = filters
+		path = f'/api/projects/{ project }/report/{ report_type }'
+		data = JSONResponseHandler(self.post(path, json_data=params)).get_data()
+		return data
 
-	def get_csv_columns(self):
-		""" Returns a list of optional columns for a project csv report."""
+	def generate_pdf(self,
+		project: int,
+		summary_mode: str = "simple",
+		details_mode: str = "with-source",
+		include_result_details: bool = False,
+		include_comments: bool = False,
+		include_request_response: bool = False,
+		filters: dict = None) -> dict:
+		"""Allows user to queue a job to generate a PDF report. 
+
+		Args:
+			project (int): CodeDx project id
+			summary_mode (str, optional): Summary mode. Defaults to "simple".
+			details_mode (str, optional): Details mode. Defaults to "with-source".
+			include_result_details (bool, optional): Include result details. Defaults to False.
+			include_comments (bool, optional): Include comments. Defaults to False.
+			include_request_response (bool, optional): Include HTTP requests/responses. Defaults to False.
+			filters (dict, optional): Filter findings in the reports. Defaults to None.
+
+		Raises:
+			RuntimeError: Invalid summary mode input.
+			RuntimeError: Invalid details mode input.
+
+		Returns:
+			dict: Data about the queued reporting task wth jobId and inputID
+		"""		
+		if not filters: 
+			filters = {}
+		if summary_mode not in ["none", "simple", "detailed"]: 
+			raise RuntimeError("Invalid summary mode input.")
+		if details_mode not in ["none", "simple", "with-source"]: 
+			raise RuntimeError("Invalid details mode input given.")
+		config = {
+			"summaryMode": summary_mode,
+			"detailsMode": details_mode,
+			"includeResultDetails": include_result_details,
+			"includeComments": include_comments,
+			"includeRequestResponse": include_request_response
+		}
+		data = self.generate(project, "pdf", config, filters)
+		return data
+
+	def get_csv_columns(self) -> list:
+		"""Returns a list of optional columns for a project csv report."""
 		return self.report_columns
 
-	def generate_csv(self, proj, cols=None):
-		""" Allows user to queue a job to generate a csv report. Returns jobId and status.
+	def generate_csv(self, project: int,  cols: list = None) -> dict:
+		"""Allows user to queue a job to generate a CSV report.
 
-			Accepts a list of columns to include in the report. Default is all columns.
-			Call get_csv_columns() to see column options.
+		Args:
+			project (int): CodeDx project id.
+			cols (list, optional): Columns to include in CSV report. Defaults to None.
 
+		Returns:
+			dict: Data about the queued reporting task wth jobId and inputID
 		"""
-		pid = self.projects_api.process_project(proj)
-		config = {}
-		if not cols: cols = self.report_columns
-		for col in cols:
-			if col not in self.report_columns: raise Exception("Invaild column name.")
+		if not cols: 
+			cols = self.report_columns
+		config = {
+			"columns": cols
+		}
 		config["columns"] = cols
-		res = self.generate(pid, "csv", config)
-		return res
+		data = self.generate(project, "csv", config)
+		return data
 
-	def generate_xml(self, proj, include_standards=False, include_source=False, include_rule_descriptions=True):
-		""" Allows user to queue a job to generate an xml report. Returns jobId and status.
+	def generate_xml(self,
+		project: int,
+		include_standards: bool = False,
+		include_source: bool = False,
+		include_rule_descriptions: bool = True) -> dict:
+		"""Allows user to queue a job to generate a XML report.
 
-			Args:
-				include_standards <Boolean>: List standards violations. Default is fault.
-				include_source <Boolean>: Include source code snippets. Default is false.
-				include_rule_descriptions <Boolean>: Include rule descriptions. Default is true.
+		Args:
+			project (int): CodeDx project id.
+			include_standards (bool, optional): Include standards. Defaults to False.
+			include_source (bool, optional): Include source. Defaults to False.
+			include_rule_descriptions (bool, optional): Include rule descriptions. Defaults to True.
 
+		Returns:
+			dict: Data about the queued reporting task wth jobId and inputID
 		"""
-		pid = self.projects_api.process_project(proj)
-		config = {}
-		self.type_check(include_standards, bool, "Include_standards")
-		config["includeStandards"] = include_standards
-		self.type_check(include_source, bool, "Include_source")
-		config["includeSource"] = include_source
-		self.type_check(include_rule_descriptions, bool, "include_rule_descriptions")
-		config["includeRuleDescriptions"] = include_rule_descriptions
-		res = self.generate(pid, "xml", config)
-		return res
+		config = {
+			"includeStandards": include_standards,
+			"includeSource": include_source,
+			"includeRuleDescriptions": include_rule_descriptions
+		}
+		data = self.generate(project, "xml", config)
+		return data
 
-	def generate_nessus(self, proj, default_host=None, operating_system="", mac_address="", netBIOS_name=""):
-		""" Allows user to queue a job to generate a nessus report. Returns jobId and status.
+	def generate_nessus(self,
+		project: int,
+		default_host: str = None,
+		operating_system: str = "",
+		mac_address: str = "",
+		netBIOS_name: str = "") -> dict:
+		"""Allows user to queue a job to generate a Nessus report.
 
-			Args:
-				default_host <String>: Default host. Required.
-				operating_system <String>: Operating System. Default is "".
-				mac_address <String>: mac address. Required.
-				netBIOS_name <String>: NetBIOS name. Defualt is "".
+		Args:
+			project (int): CodeDx project id.
+			default_host (str, optional): Default host. Defaults to None.
+			operating_system (str, optional): Operating system. Defaults to "".
+			mac_address (str, optional): MAC address. Defaults to "".
+			netBIOS_name (str, optional): netBIOS name. Defaults to "".
 
-		"""
-		pid = self.projects_api.process_project(proj)
-		config = {}
-		self.type_check(default_host, str, "Default_host")
-		config["defaultHost"] = default_host
-		self.type_check(operating_system, str, "Operating_system")
-		config["operatingSystem"] = operating_system
-		self.type_check(mac_address, str, "mac_address")
+		Raises:
+			RuntimeError: Raise if given an invalid mac address.
+
+		Returns:
+			dict: Data about the queued reporting task wth jobId and inputID
+		"""		
 		if re.search(mac_address, "^([0-9A-Fa-f]{2}:){5}([0-9A-Fa-f]{2})$") is None:
-			raise Exception("Not a valid mac address.")
-		config["macAddress"] = mac_address
-		self.type_check(netBIOS_name, str, "netBIOS_name")
-		config["netBIOSName"] = netBIOS_name
-		res = self.generate(pid, "nessus", config)
-		return res
+			raise RuntimeError("Nessus report not given a valid mac address.")
+		config = {
+			"defaultHost": default_host,
+			"operatingSystem": operating_system,
+			"macAddress": mac_address,
+			"netBIOSName": netBIOS_name
+		}
+		data = self.generate(project, "nessus", config)
+		return data
 
-	def generate_nbe(self, proj, host_address=None):
-		""" Allows user to queue a job to generate an AlienVault/NBE report. Returns jobId and status.
+	def generate_nbe(self, project: int, host_address: str = None) -> dict:
+		"""Allows user to queue a job to generate a NBE report.
 
-			Args:
-				host_address <String>: Host IP address. Required.
+		Args:
+			project (int): CodeDx project id.
+			host_address (str, optional): IP address. Defaults to None.
 
-		"""
-		pid = self.projects_api.process_project(proj)
-		config = {}
-		self.type_check(host_address, str, "Host_address")
+		Raises:
+			RuntimeError: Given an invalid host address
+		Returns:
+			dict: Data about the queued reporting task wth jobId and inputID
+		"""		
 		if re.search(host_address, "^((25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\\.){3}((25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9]))$") is None:
-			raise Exception("Not a valid IPv4 address.")
-		config["hostAddresss"] = host_address
-		res = self.generate(pid, "nbe", config)
-		return res
+			raise RuntimeError("NBE report not given a valid IPv4 address.")
+		config = {
+			"hostAddresss": host_address
+		}
+		data = self.generate(project, "nbe", config)
+		return data
