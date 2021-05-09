@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import patch
 
 from codedx_api.APIs import JobsAPI
-from MockResponses import DataMock, JSONMock
+from tests.MockResponses import DataMock, JSONMock
 
 # DO NOT UPDATE - MOCK REQUESTS DO NOT REQUIRE CREDENTIALS
 api_key = "0000-0000-0000-0000"

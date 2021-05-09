@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 from codedx_api.APIs.BaseAPIClient import ContentType
 from codedx_api.APIs.FindingsAPI import Findings
-from MockResponses import DataMock, JSONMock
+from tests.MockResponses import DataMock, JSONMock
 
 # DO NOT UPDATE - MOCK REQUESTS DO NOT REQUIRE CREDENTIALS
 api_key = "0000-0000-0000-0000"
