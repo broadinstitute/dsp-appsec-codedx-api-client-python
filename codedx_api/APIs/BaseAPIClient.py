@@ -1,27 +1,30 @@
+import logging
+from enum import Enum
+
 import requests
+from requests import Response
+from requests.exceptions import ContentDecodingError, HTTPError
+
 
 class BaseAPIClient(object):
 
-	def __init__(self, base, api_key, verbose = False):
-		"""Base API Client for requests."""
-		self.verbose = verbose
-		self.base_path = base
+	def __init__(self, base_url: str, api_key: str):
+		"""Constructor for the base CodeDx API client
+
+		Args:
+			base_url (str): The CodeDx base url. Must be in the correct format: https://[CODEDX-HOST]/codedx
+			api_key (str): An API key from CodeDx.
+		"""
+		self.base_url = base_url
 		self.api_key = api_key
 		self.headers = {
 			'API-Key': self.api_key,
 			'accept': 'application/json',
 			'Content-Type': 'application/json'
 		}
-		self.commands = {
-			"GET": self._get,
-			"POST": self._post,
-			"PUT": self._put,
-			"DELETE": self._delete,
-			"UPLOAD": self._upload
-		}
 
-	def _compose_url(self,local_path):
-		return self.base_path + local_path
+	def _compose_url(self, path: str):
+		return self.base_url + path
 
 	def _compose_headers(self,local_headers):
 		headers = self.headers
@@ -38,66 +41,126 @@ class BaseAPIClient(object):
 			raise Exception(msg)
 		return True
 
-	@staticmethod
-	def _get(url, headers, json_data, content_type):
-		res = APIResponse(requests.get(url, headers=headers), content_type)
-		return res.getData()
+	def get(self, path, json_data=None, content_type='application/json;charset=utf-8', local_headers=None):
+		""" Composes a get request to CodeDx
 
-	@staticmethod
-	def _post(url, headers, json_data, content_type):
-		res = APIResponse(requests.post(url, headers=headers, json=json_data), content_type)
-		return res.getData()
+		Args:
+			path ([type]): [description]
+			json_data ([type], optional): [description]. Defaults to None.
+			content_type (str, optional): [description]. Defaults to 'application/json;charset=utf-8'.
+			local_headers ([type], optional): [description]. Defaults to None.
 
-	def _upload(self, url, headers, json_data, content_type):
-		if 'file_name' not in json_data or 'file_path' not in json_data or 'file_type' not in json_data:
-			raise Exception("Missing file data.")
-		headers = {'API-Key': self.api_key, 
-			'accept': 'application/json'}
-		if 'X-Client-Request-Id' in json_data:
-			headers['X-Client-Request-Id'] = json_data['X-Client-Request-Id']
-		f = open(json_data['file_path'], 'rb')
-		files = {
-			'file': (json_data['file_name'], f, json_data['file_type'])
-		}
-		res = APIResponse(requests.post(url, headers=headers, files=files), content_type)
-		f.close()
-		return res.getData()
-
-	@staticmethod
-	def _put(url, headers, json_data, content_type):
-		res = APIResponse(requests.put(url,headers=headers,json=json_data), content_type)
-		return res.getData()
-
-	@staticmethod
-	def _delete(url, headers, json_data, content_type):
-		res = APIResponse(requests.delete(url, headers=headers), None)
-		return res.getData()
-
-	def call(self, method, local_path, json_data=None, content_type='application/json;charset=utf-8', local_headers=None):
-		url = self._compose_url(local_path)
+		Returns:
+			[type]: [description]
+		"""
+		url = self._compose_url(path)
 		headers = self._compose_headers(local_headers)
-		return self.commands[method](url, headers, json_data, content_type)
+		res = requests.get(url, headers=headers)
+		return res
 
-class APIResponse(object):
-	def __init__(self, response, content_type):
-		"""Initialize API Response"""
-		self.content_type = content_type
-		self.validate(response)
-		self.status = response.status_code
-		if content_type == 'application/json;charset=utf-8':
-			self.data = response.json()
-		elif content_type in ['text/csv', 'application/pdf', 'text/xml']:
-			self.data = response.content
-		else:
-			self.data = {'status': 'Success'}
+	def download(self, path, json_data=None, content_type='application/json;charset=utf-8', local_headers=None):
+		url = self._compose_url(path)
+		headers = self._compose_headers(local_headers)
+		res = requests.get(url, headers=headers)
+		return res
 
-	def validate(self, response):
-		if response.status_code > 299:
-			if response.status_code > 499:
-				print(response.content)
-			raise Exception("Error: " + str(response.status_code))
-		if 'Content-Type' in response.headers and response.headers['Content-Type'] != self.content_type:
-			raise Exception("Illegal content type")
+	def post(self, path, json_data=None, content_type='application/json;charset=utf-8', local_headers=None):
+		url = self._compose_url(path)
+		headers = self._compose_headers(local_headers)
+		res = requests.post(url, headers=headers, json=json_data)
+		return res
 
-	def getData(self):
-		return self.data
+	def upload(self, path, file_data, local_headers=None):
+		url = self._compose_url(path)
+		headers = self._compose_headers(local_headers)
+		headers.pop('Content-Type', None)
+		with open(file_data['file_path'], 'rb') as f:
+			files = {
+				'file': (file_data['file_name'], f, file_data['file_type'])
+			}
+			res = requests.post(url, headers=headers, files=files)
+		return res
+
+	def put(self, path, json_data, content_type='application/json;charset=utf-8', local_headers=None):
+		url = self._compose_url(path)
+		headers = self._compose_headers(local_headers)
+		res = requests.put(url,headers=headers,json=json_data)
+		return res
+
+	def delete(self, path, json_data=None, content_type='application/json;charset=utf-8', local_headers=None):
+		url = self._compose_url(path)
+		headers = self._compose_headers(local_headers)
+		res = requests.delete(url, headers=headers)
+		return res
+
+
+class ContentType(str, Enum):
+	"""Enumerates accepted content types"""
+	JSON = 'application/json;charset=utf-8'
+	CSV = 'text/csv'
+	PDF = 'application/pdf'
+	XML = 'text/xml'
+	TEXT = 'text/plain'
+
+	def text(self) -> str:
+		""" Get status in format that will be accepted by CodeDx
+
+		Returns:
+			str: Finding status
+		"""
+		return str(self.value)
+
+class ResponseHandler:
+	def __init__(self, response):
+		"""Initialize a Response Handler for requests.Response object"""
+		self.response = response
+
+	def validate(self):		
+		"""Validate response by raising exceptions for unexpected return values"""
+		if self.response.status_code > 299:
+			error = f"Error from CodeDx (Status Code {self.response.status_code})"
+			if self.response.content:
+				error += f": { self.response.content }"
+			elif self.response.text:
+				error += f": { self.response.text }"
+			raise HTTPError(error)
+
+	def get_data(self):
+		"""Temp"""
+		self.validate()
+		if self.response.json():
+			return self.response.json()
+		return None
+
+
+class JSONResponseHandler(ResponseHandler):
+	def validate(self):
+		"""Validate response by raising exceptions for unexpected return values"""
+		super().validate()
+		if ("Content-Type" not in self.response.headers or 
+			self.response.headers["Content-Type"] != ContentType.JSON):
+			raise ContentDecodingError("Error: CodeDx Response was not type JSON.")
+
+	def get_data(self) -> dict:
+		"""Returns a JSON dictionary with response data"""
+		self.validate()
+		return self.response.json()
+
+
+class ContentResponseHandler(ResponseHandler):
+	def __init__(self, response: Response, content: ContentType):
+		"""Initialize Content Response Handler"""
+		self.response = response
+		self.content = content
+
+	def validate(self):
+		"""Validate Response by raising exceptions for unexpected return values"""
+		super().validate()
+		if ("Content-Type" not in self.response.headers or 
+			self.response.headers["Content-Type"] != self.content):
+			raise ContentDecodingError("Error: CodeDx Response does not match accepted type.")
+
+	def get_data(self):
+		"""Returns the content of the response"""
+		self.validate()
+		return self.response.content

@@ -1,4 +1,6 @@
 import unittest
+from unittest.mock import patch
+
 from codedx_api.CodeDxAPI import CodeDx
 
 # DO NOT UPDATE - MOCK REQUESTS DO NOT REQUIRE CREDENTIALS
