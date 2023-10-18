@@ -3,6 +3,6 @@ chardet==3.0.4
 idna==2.8
 requests==2.31.0
 six==1.12.0
-urllib3==1.26.17
+urllib3==1.26.18
 xerox==0.4.1
 mock==4.0.2
