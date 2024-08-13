@@ -1,4 +1,4 @@
-FROM python:alpine3.7
+FROM python:alpine3.8
 RUN addgroup -S codedxuser && adduser -S -G codedxuser codedxuser
 COPY . /app/
 WORKDIR /app/
